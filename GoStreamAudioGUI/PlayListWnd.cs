@@ -419,18 +419,28 @@ namespace GoStreamAudioGUI
             }
         }
 
-        public void StartPlaying(string fName, int plPos)
+        public bool StartPlaying(string fName, int plPos)
         {
+            bool canPlay = false;
             parent.EnableButtons(false);
-                if (parent.IsWaitingHandle)
-                {
-                    parent.IsWaitingHandle = false;
-                    parent.WaitHandle.Set();
-                }
+            if (parent.IsWaitingHandle)
+            {
+                parent.IsWaitingHandle = false;
+                parent.WaitHandle.Set();
+            }
+            if (File.Exists(fName))
+            {
                 parent.AudioFile = fName;
                 parent.InitPlayer();
                 parent.InitBgWorker();
                 parent.StartPlaybackThread();
+                canPlay = true;
+            }
+            else
+            {
+                MessageBox.Show(string.Format("File {0} not found!", fName));
+            }
+            return canPlay;
         }
 
         private AudioFileInfo GetAudioFileInfo(ListViewItem item)
@@ -526,29 +536,27 @@ namespace GoStreamAudioGUI
                 if (lastFileIdx >= 0)
                     l.Items[lastFileIdx].ForeColor = l.Items[lastFileIdx].SubItems[1].ForeColor = Color.Black;
                 hasUserSelTrack = true;
-                //if (parent.AudioFile != null)
-                //{
-                //    parent.AudioPlayer.PlaybackStopType = PlaybackStopTypes.PlaybackStoppedReachingEndOfFile;
-                //    parent.AudioPlayer.StopPlayback();
-                //}
-                //else
+               
+                lastFileIdx = item.Index;
+                parent.UserStopped = false;
+                AudioFileInfo afInfo = GetAudioFileInfo(item);
+                if (StartPlaying(afInfo.FullPath, lastFileIdx))
                 {
-                    lastFileIdx = item.Index;
-                    parent.UserStopped = false;
-                    AudioFileInfo afInfo = GetAudioFileInfo(item);
-                    StartPlaying(afInfo.FullPath, lastFileIdx);
                     item.ForeColor = item.SubItems[1].ForeColor = Color.Blue;
                     parent.IsPlaylistRunning = true;
 
-                    if (l.Items[lastFileIdx].SubItems[1].Text == "")
+                    if (parent.AudioPlayer != null)
                     {
-                        //afInfo.SetDuration();
-                        l.Items[lastFileIdx].SubItems[1].Text = Utils.FormatTimeSpan2(parent.AudioPlayer.GetTotalTime());
-                        l.Columns[1].AutoResize(ColumnHeaderAutoResizeStyle.ColumnContent);
+                        if (l.Items[lastFileIdx].SubItems[1].Text == "")
+                        {
+                            l.Items[lastFileIdx].SubItems[1].Text = Utils.FormatTimeSpan2(parent.AudioPlayer.GetTotalTime());
+                            l.Columns[1].AutoResize(ColumnHeaderAutoResizeStyle.ColumnContent);
+                        }
                     }
+
+                    //MessageBox.Show("The selected Item Name is: " + item.Text);
+                    OnPlaylistItemDoubleClicked(e);
                 }
-                //MessageBox.Show("The selected Item Name is: " + item.Text);
-                OnPlaylistItemDoubleClicked(e);
             }
             else
             {

@@ -274,7 +274,7 @@ namespace GoStreamAudioGUI
                 audioPlayer.PlaybackStopType = pbStopType; //PlaybackStopTypes.PlaybackStoppedReachingEndOfFile;
                 audioPlayer.PlaybackPaused += audioPlayer_PlaybackPaused;
                 audioPlayer.PlaybackResumed += audioPlayer_PlaybackResumed;
-                audioPlayer.PlaybackStopped += audioPlayer_PlaybackStopped;                
+                audioPlayer.PlaybackStopped += audioPlayer_PlaybackStopped;
             }
             catch (Exception)
             {
@@ -598,9 +598,12 @@ namespace GoStreamAudioGUI
 
         void plWnd_PlaylistItemDoubleClicked(object sender, EventArgs e)
         {
-            plWnd.HasUserSelTrack = true;
-            currentAudioFile = plWnd.GetFileToPlay(plWnd.LastFileIdx);
-            UpdateMarquee();
+            if (File.Exists(mAudioFile))
+            {
+                plWnd.HasUserSelTrack = true;
+                currentAudioFile = plWnd.GetFileToPlay(plWnd.LastFileIdx);
+                UpdateMarquee();
+            }
             //if (audioPlayer != null)
             //    audioPlayer.PlaybackStopType = PlaybackStopTypes.PlaybackStoppedByUser;
         }
@@ -754,12 +757,17 @@ namespace GoStreamAudioGUI
                             if (aPos < plWnd.GetPlaylistSize())
                             {
                                 currentAudioFile = plWnd.GetFileToPlay(aPos);
-                                mAudioFile = currentAudioFile.FullPath; 
+                                mAudioFile = currentAudioFile.FullPath;
 
-                                InitPlayer();
-                                InitBgWorker();
-                                StartPlaybackThread();
-                                NextTrackStarted(this, e);
+                                if (File.Exists(mAudioFile))
+                                {
+                                    InitPlayer();
+                                    InitBgWorker();
+                                    StartPlaybackThread();
+                                    NextTrackStarted(this, e);
+                                }
+                                //else
+                                //    MessageBox.Show(string.Format("File {0} not found!", mAudioFile));
                                 //++plWnd.LastFileIdx;                            
                             }
                             else
@@ -784,18 +792,28 @@ namespace GoStreamAudioGUI
             }
         }
 
-        private void ResetPlayList(object sender, EventArgs e, int plIdx)
+        private bool ResetPlayList(object sender, EventArgs e, int plIdx)
         {
+            bool canPlay = false;
             if (plIdx >= 0)
             {
                 plWnd.LastFileIdx = plIdx;
                 if (plWnd.GetNextFileFromPlayList())
                 {
-                    InitPlayer();
-                    StartPlaybackThread();
-                    NextTrackStarted(sender, e);
+                    if (File.Exists(mAudioFile))
+                    {
+                        InitPlayer();
+                        StartPlaybackThread();
+                        NextTrackStarted(sender, e);
+                        canPlay = true;
+                    }
+                    else
+                    {
+                        MessageBox.Show(string.Format("File {0} not found", mAudioFile));
+                    }
                 }
             }
+            return canPlay;
         }
 
         #region Event Handlers
@@ -946,15 +964,6 @@ namespace GoStreamAudioGUI
             plWnd.Culture = LocalizedForm.GlobalUICulture;
         }
 
-        //private void applyResources(ComponentResourceManager resources, Control.ControlCollection ctls)
-        //{
-        //    foreach (Control ctl in ctls)
-        //    {
-        //        resources.ApplyResources(ctl, ctl.Name);
-        //        applyResources(resources, ctl.Controls);
-        //    }
-        //}
-
         private void btnRew_Click(object sender, EventArgs e)
         {
             if (isSingleFilePlaying)
@@ -971,18 +980,21 @@ namespace GoStreamAudioGUI
                         isWaitingHandle = false;
                         //audioPlayer.PlaybackStopType = PlaybackStopTypes.PlaybackStoppedByUser;
                         waitHandle.Set();
+                        if (File.Exists(mAudioFile))
+                            UpdateMarquee();
                     }
                     else
-                    {
-                        IsPlaylistRunning = true;
-                        CurrentTrackCompleted(sender, e);
-                        audioPlayer.PlaybackStopType = PlaybackStopTypes.PlaybackStoppedReachingEndOfFile;
-                        userStopped = false;
-                        ResetPlayList(sender, e, plWnd.LastFileIdx - 1);
-
-                        currentAudioFile = plWnd.GetFileToPlay(plWnd.LastFileIdx);                        
+                    {                        
+                        if (ResetPlayList(sender, e, plWnd.LastFileIdx - 1))
+                        {
+                            IsPlaylistRunning = true;
+                            CurrentTrackCompleted(sender, e);
+                            audioPlayer.PlaybackStopType = PlaybackStopTypes.PlaybackStoppedReachingEndOfFile;
+                            userStopped = false;
+                            currentAudioFile = plWnd.GetFileToPlay(plWnd.LastFileIdx);
+                            UpdateMarquee();
+                        }
                     }
-                    UpdateMarquee();
                 }
             }
             else
@@ -1003,17 +1015,21 @@ namespace GoStreamAudioGUI
                     {
                         isWaitingHandle = false;
                         waitHandle.Set();
+                        if (File.Exists(mAudioFile))
+                            UpdateMarquee();
                     }
                     else
-                    {
-                        IsPlaylistRunning = true;
-                        CurrentTrackCompleted(sender, e);
-                        audioPlayer.PlaybackStopType = PlaybackStopTypes.PlaybackStoppedReachingEndOfFile;
-                        userStopped = false;
-                        ResetPlayList(sender, e, plWnd.LastFileIdx + 1);
-                        currentAudioFile = plWnd.GetFileToPlay(plWnd.LastFileIdx);                        
-                    }
-                    UpdateMarquee();
+                    {                        
+                        if (ResetPlayList(sender, e, plWnd.LastFileIdx + 1))
+                        {
+                            IsPlaylistRunning = true;
+                            CurrentTrackCompleted(sender, e);
+                            audioPlayer.PlaybackStopType = PlaybackStopTypes.PlaybackStoppedReachingEndOfFile;
+                            userStopped = false;
+                            currentAudioFile = plWnd.GetFileToPlay(plWnd.LastFileIdx);
+                            UpdateMarquee();
+                        }
+                    }                    
                 }
             }
             else
