@@ -988,7 +988,6 @@ namespace GoStreamAudioGUI
                         if (ResetPlayList(sender, e, plWnd.LastFileIdx - 1))
                         {
                             IsPlaylistRunning = true;
-                            CurrentTrackCompleted(sender, e);
                             audioPlayer.PlaybackStopType = PlaybackStopTypes.PlaybackStoppedReachingEndOfFile;
                             userStopped = false;
                             currentAudioFile = plWnd.GetFileToPlay(plWnd.LastFileIdx);
@@ -999,7 +998,14 @@ namespace GoStreamAudioGUI
             }
             else
             {
-                ResetPlayList(sender, e, 0);
+                if (ResetPlayList(sender, e, 0))
+                {
+                    IsPlaylistRunning = true;
+                    audioPlayer.PlaybackStopType = PlaybackStopTypes.PlaybackStoppedReachingEndOfFile;
+                    userStopped = false;
+                    currentAudioFile = plWnd.GetFileToPlay(plWnd.LastFileIdx);
+                    UpdateMarquee();
+                }
             }
         }
         
@@ -1011,6 +1017,8 @@ namespace GoStreamAudioGUI
             {
                 if (plWnd.LastFileIdx < plWnd.GetPlaylistSize() - 1)
                 {
+                    CurrentTrackCompleted(sender, e);
+
                     if (bgPlayWorker.IsBusy && isWaitingHandle)
                     {
                         isWaitingHandle = false;
@@ -1022,8 +1030,7 @@ namespace GoStreamAudioGUI
                     {                        
                         if (ResetPlayList(sender, e, plWnd.LastFileIdx + 1))
                         {
-                            IsPlaylistRunning = true;
-                            CurrentTrackCompleted(sender, e);
+                            IsPlaylistRunning = true;                            
                             audioPlayer.PlaybackStopType = PlaybackStopTypes.PlaybackStoppedReachingEndOfFile;
                             userStopped = false;
                             currentAudioFile = plWnd.GetFileToPlay(plWnd.LastFileIdx);
@@ -1034,7 +1041,14 @@ namespace GoStreamAudioGUI
             }
             else
             {
-                ResetPlayList(sender, e, 0);
+                if (ResetPlayList(sender, e, 0))
+                {
+                    IsPlaylistRunning = true;
+                    audioPlayer.PlaybackStopType = PlaybackStopTypes.PlaybackStoppedReachingEndOfFile;
+                    userStopped = false;
+                    currentAudioFile = plWnd.GetFileToPlay(plWnd.LastFileIdx);
+                    UpdateMarquee();
+                }
             }
         }       
     }

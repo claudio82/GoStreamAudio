@@ -214,6 +214,10 @@ namespace GoStreamAudioGUI
                                 //    (int)totPlaylistTime/60, (int)totPlaylistTime % 60);
                                 //StartPlaying(l.Items[0].Text, 0);
                             }
+                            else
+                            {
+                                lblPlistInfo.Text = string.Format("{0} files.", 0);
+                            }
                         };
                         Invoke(action);
                     });
@@ -339,6 +343,10 @@ namespace GoStreamAudioGUI
                         //    (int)totPlaylistTime / 60, (int)totPlaylistTime % 60);
                         //StartPlaying(l.Items[0].Text, 0);
                     }
+                    else
+                    {
+                        lblPlistInfo.Text = string.Format("{0} files.", 0);
+                    }
                 }
             }
         }
@@ -455,7 +463,7 @@ namespace GoStreamAudioGUI
 
         void parent_CurrentTrackCompleted(object sender, EventArgs e)
         {
-            if (lastFileIdx >= 0)
+            if (l.Items.Count > 0 && lastFileIdx >= 0)
             {
                 Action action = () =>
                     {
@@ -467,7 +475,7 @@ namespace GoStreamAudioGUI
 
         void parent_NextTrackStarted(object sender, EventArgs e)
         {
-            if (lastFileIdx >= 0)
+            if (l.Items.Count > 0 && lastFileIdx >= 0)
             {
                 Action action = () =>
                     {
