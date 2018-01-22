@@ -234,8 +234,8 @@
             // 
             // btnPause
             // 
-            resources.ApplyResources(this.btnPause, "btnPause");
             this.btnPause.Image = global::GoStreamAudioGUI.Properties.Resources.pause;
+            resources.ApplyResources(this.btnPause, "btnPause");
             this.btnPause.Name = "btnPause";
             this.btnPause.UseVisualStyleBackColor = true;
             this.btnPause.Click += new System.EventHandler(this.btnPause_Click);
