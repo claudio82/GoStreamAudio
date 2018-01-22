@@ -6,14 +6,14 @@ The solution is split in 2 projects:
 - GoStreamAudioLib : the library for player functionalities which uses NAudio libraries
 
 # What it can do
-The player currently supports these file types: MP3, M4A, Wave, Vorbis OGG, FLAC.
+The player currently supports these file types: MP3, M4A, WMA, Wave, Vorbis OGG, FLAC.
 It can play a single file or multiple files from a playlist.
 In addition, it is possible to load or save a playlist, or remove all the entries from current playlist. 
 
 Supported playlist formats: M3U
 
 # Next things to do
-- Playlist shuffle and repeat modes
+- Playlist continous repeat mode
 - ...
 
 # Build and Test
