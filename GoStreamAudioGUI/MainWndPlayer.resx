@@ -117,10 +117,10 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
-  <metadata name="menuStrip1.TrayLocation" type="System.Drawing.Point, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a">
-    <value>17, 17</value>
-  </metadata>
   <assembly alias="System.Drawing" name="System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a" />
+  <data name="menuStrip1.TrayLocation" type="System.Drawing.Point, System.Drawing">
+    <value>17, 17</value>
+  </data>
   <data name="openTsmItem.Size" type="System.Drawing.Size, System.Drawing">
     <value>103, 22</value>
   </data>
@@ -212,9 +212,9 @@
   <data name="&gt;&gt;menuStrip1.ZOrder" xml:space="preserve">
     <value>16</value>
   </data>
-  <metadata name="openSFileDlg.TrayLocation" type="System.Drawing.Point, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a">
+  <data name="openSFileDlg.TrayLocation" type="System.Drawing.Point, System.Drawing">
     <value>132, 17</value>
-  </metadata>
+  </data>
   <data name="openSFileDlg.Title" xml:space="preserve">
     <value>Open audio file</value>
   </data>
@@ -323,9 +323,9 @@
   <data name="&gt;&gt;lblAudioDriver.ZOrder" xml:space="preserve">
     <value>10</value>
   </data>
-  <metadata name="bgPlayWorker.TrayLocation" type="System.Drawing.Point, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a">
+  <data name="bgPlayWorker.TrayLocation" type="System.Drawing.Point, System.Drawing">
     <value>255, 17</value>
-  </metadata>
+  </data>
   <data name="tbVolume.Location" type="System.Drawing.Point, System.Drawing">
     <value>66, 113</value>
   </data>
@@ -621,12 +621,12 @@
   <data name="&gt;&gt;chkShuffle.ZOrder" xml:space="preserve">
     <value>0</value>
   </data>
-  <metadata name="toolTipShuffle.TrayLocation" type="System.Drawing.Point, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a">
+  <data name="toolTipShuffle.TrayLocation" type="System.Drawing.Point, System.Drawing">
     <value>383, 17</value>
-  </metadata>
-  <metadata name="$this.Localizable" type="System.Boolean, mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089">
+  </data>
+  <data name="$this.Localizable" type="System.Boolean, mscorlib">
     <value>True</value>
-  </metadata>
+  </data>
   <data name="$this.AutoScaleDimensions" type="System.Drawing.SizeF, System.Drawing">
     <value>6, 13</value>
   </data>
@@ -1256,5 +1256,11 @@
   </data>
   <data name="&gt;&gt;$this.Type" xml:space="preserve">
     <value>GoStreamAudioGUI.LocalizedForm, GoStreamAudioGUI, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null</value>
+  </data>
+  <data name="MainWndPlayer.Text" xml:space="preserve">
+    <value>GoStreamAudio</value>
+  </data>
+  <data name="openAudioFilterType" xml:space="preserve">
+    <value>Audio Files</value>
   </data>
 </root>

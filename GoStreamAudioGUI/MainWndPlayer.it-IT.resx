@@ -157,9 +157,6 @@
   <data name="lblVolume.Text" xml:space="preserve">
     <value>Volume:</value>
   </data>
-  <data name="MainWndPlayer.Text" xml:space="preserve">
-    <value>GoStreamAudio</value>
-  </data>
   <data name="menuStrip1.Text" xml:space="preserve">
     <value>mMenuStrip</value>
   </data>
@@ -177,9 +174,6 @@
   </data>
   <data name="viewToolStripMenuItem.Text" xml:space="preserve">
     <value>Visualizza</value>
-  </data>
-  <data name="openAudioFilterType" xml:space="preserve">
-    <value>File Audio</value>
   </data>
   <data name="toolTipShuffle.Title" xml:space="preserve">
     <value>Casuale</value>
