@@ -1263,4 +1263,10 @@
   <data name="toolTipShuffle.Title" xml:space="preserve">
     <value>Shuffle</value>
   </data>
+  <data name="MainWndPlayer.Text" xml:space="preserve">
+    <value>GoStreamAudio</value>
+  </data>
+  <data name="openAudioFilterType" xml:space="preserve">
+    <value>Audio File</value>
+  </data>
 </root>
