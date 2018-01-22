@@ -1076,6 +1076,7 @@ namespace GoStreamAudioGUI
                 }
                 else
                 {
+                    if (plWnd.LastFileIdx < 0) return;
                     if (plWnd.LastFileIdx == 0 && mIsShuffleChecked)
                     {
                         CurrentTrackCompleted(sender, e);
@@ -1147,6 +1148,8 @@ namespace GoStreamAudioGUI
                         }
                         else
                         {
+                            if (plWnd.LastFileIdx < 0)
+                                plWnd.LastFileIdx = 0;
                             nextPos = randSongsIdx[plWnd.LastFileIdx].PosInPlayList;
                         }
                         if (ResetPlayList(sender, e, nextPos))
