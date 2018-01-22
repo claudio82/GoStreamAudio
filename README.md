@@ -13,7 +13,7 @@ In addition, it is possible to load or save a playlist, or remove all the entrie
 Supported playlist formats: M3U
 
 # Next things to do
-- Playlist continous repeat mode
+- Playlist continuous repeat mode
 - ...
 
 # Build and Test
