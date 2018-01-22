@@ -58,6 +58,9 @@
             this.btnStop = new System.Windows.Forms.Button();
             this.btnPlay = new System.Windows.Forms.Button();
             this.marqueeLbl = new GoStreamAudioGUI.MarqueeLabel();
+            this.chkRepeat = new System.Windows.Forms.CheckBox();
+            this.chkShuffle = new System.Windows.Forms.CheckBox();
+            this.toolTipShuffle = new System.Windows.Forms.ToolTip(this.components);
             this.menuStrip1.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.tbVolume)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.tbAudioPos)).BeginInit();
@@ -203,16 +206,16 @@
             // 
             // btnRew
             // 
-            resources.ApplyResources(this.btnRew, "btnRew");
             this.btnRew.Image = global::GoStreamAudioGUI.Properties.Resources.prev;
+            resources.ApplyResources(this.btnRew, "btnRew");
             this.btnRew.Name = "btnRew";
             this.btnRew.UseVisualStyleBackColor = true;
             this.btnRew.Click += new System.EventHandler(this.btnRew_Click);
             // 
             // btnFwd
             // 
-            resources.ApplyResources(this.btnFwd, "btnFwd");
             this.btnFwd.Image = global::GoStreamAudioGUI.Properties.Resources.next;
+            resources.ApplyResources(this.btnFwd, "btnFwd");
             this.btnFwd.Name = "btnFwd";
             this.btnFwd.UseVisualStyleBackColor = true;
             this.btnFwd.Click += new System.EventHandler(this.btnFwd_Click);
@@ -260,10 +263,32 @@
             this.marqueeLbl.Speed = 1;
             this.marqueeLbl.yOffset = 0;
             // 
+            // chkRepeat
+            // 
+            resources.ApplyResources(this.chkRepeat, "chkRepeat");
+            this.chkRepeat.Image = global::GoStreamAudioGUI.Properties.Resources.repeat;
+            this.chkRepeat.Name = "chkRepeat";
+            this.chkRepeat.TabStop = false;
+            this.chkRepeat.UseVisualStyleBackColor = true;
+            // 
+            // chkShuffle
+            // 
+            resources.ApplyResources(this.chkShuffle, "chkShuffle");
+            this.chkShuffle.Image = global::GoStreamAudioGUI.Properties.Resources.shuffle;
+            this.chkShuffle.Name = "chkShuffle";
+            this.chkShuffle.UseVisualStyleBackColor = true;
+            this.chkShuffle.CheckedChanged += new System.EventHandler(this.chkShuffle_CheckedChanged);
+            // 
+            // toolTipShuffle
+            // 
+            this.toolTipShuffle.ShowAlways = true;
+            // 
             // MainWndPlayer
             // 
             resources.ApplyResources(this, "$this");
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
+            this.Controls.Add(this.chkShuffle);
+            this.Controls.Add(this.chkRepeat);
             this.Controls.Add(this.marqueeLbl);
             this.Controls.Add(this.btnPause);
             this.Controls.Add(this.tbAudioPos);
@@ -304,6 +329,30 @@
             }
         }
 
+        public System.Windows.Forms.CheckBox CheckBoxShuffle
+        {
+            get
+            {
+                return chkShuffle;
+            }
+        }
+
+        public System.Windows.Forms.ToolTip ToolTipShuffle
+        {
+            get
+            {
+                return toolTipShuffle;
+            }
+        }
+
+        public MarqueeLabel MarqueeLbl
+        {
+            get
+            {
+                return marqueeLbl;
+            }
+        }
+
         #endregion
 
         private AppMenuStrip menuStrip1;
@@ -333,6 +382,9 @@
         private System.Windows.Forms.ToolStripMenuItem langTsmItem;
         private System.Windows.Forms.ToolStripMenuItem langEngTsmItem;
         private System.Windows.Forms.ToolStripMenuItem langItaTsmItem;
-        private MarqueeLabel marqueeLbl;        
+        private MarqueeLabel marqueeLbl;
+        private System.Windows.Forms.CheckBox chkRepeat;
+        private System.Windows.Forms.CheckBox chkShuffle;
+        private System.Windows.Forms.ToolTip toolTipShuffle;        
     }
 }

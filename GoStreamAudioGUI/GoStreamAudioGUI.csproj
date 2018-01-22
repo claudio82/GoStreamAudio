@@ -77,6 +77,8 @@
     <Compile Include="MainWndPlayer.Designer.cs">
       <DependentUpon>MainWndPlayer.cs</DependentUpon>
     </Compile>
+    <Compile Include="PlayListEntry.cs" />
+    <Compile Include="PlayListShuffler.cs" />
     <Compile Include="PlayListWnd.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -176,6 +178,12 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="img\next.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="img\repeat.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="img\shuffle.png" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

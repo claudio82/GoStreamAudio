@@ -64,7 +64,7 @@ namespace GoStreamAudioGUI
                         ApplyMenus(item.DropDownItems, culture);
                         this.resManager.ApplyResources(item, item.Name, culture);                        
                     }
-                }
+                }                
                 else if (ctl.GetType() == typeof(ListView))
                 {
                     ListView mList = (ListView)ctl;
@@ -81,6 +81,9 @@ namespace GoStreamAudioGUI
             {
                 MainWndPlayer frm = (MainWndPlayer)parent;
                 resManager.ApplyResources(frm.OpenSFileDlg, "openSFileDlg", culture);
+                frm.ToolTipShuffle.SetToolTip(frm.CheckBoxShuffle, resManager.GetString("toolTipShuffle.Title", culture));
+                frm.MarqueeLbl.Width = frm.Width + frm.MarqueeLbl.Text.Length + 5;
+                //resManager.ApplyResources(frm.ToolTipShuffle, "toolTipShuffle", culture);
             }
         }
 

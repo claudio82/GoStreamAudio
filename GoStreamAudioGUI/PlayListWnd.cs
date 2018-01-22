@@ -57,6 +57,14 @@ namespace GoStreamAudioGUI
             }
         }
 
+        public System.Windows.Forms.ListView.ListViewItemCollection PlayListItems
+        {
+            get
+            {
+                return this.l.Items;
+            }
+        }
+
         #endregion
 
         public PlayListWnd(MainWndPlayer parent)
@@ -141,14 +149,19 @@ namespace GoStreamAudioGUI
             string nFile = "";
             if (lastFileIdx < l.Items.Count)
             {
-                nFile = l.Items[lastFileIdx].Text;
-                AudioFileInfo afInfo = GetAudioFileInfo(l.Items[lastFileIdx]);
-                parent.AudioFile = afInfo.FullPath;
+                Action action = () =>
+                {
+                    nFile = l.Items[lastFileIdx].Text;
+                    AudioFileInfo afInfo = GetAudioFileInfo(l.Items[lastFileIdx]);
+                    parent.AudioFile = afInfo.FullPath;
+                };
+                Invoke(action);
                 return true;
             }
             else
             {
-                lastFileIdx = l.Items.Count - 1;
+                Action action = () => lastFileIdx = l.Items.Count - 1;
+                Invoke(action);
                 return false;
             }
         }
@@ -208,7 +221,7 @@ namespace GoStreamAudioGUI
                                 this.btnClear.Enabled = true;
                                 this.btnSave.Enabled = true;
 
-                                PlaylistLoaded(this, null);
+                                //PlaylistLoaded(this, null);
 
                                 //lblPlistInfo.Text += string.Format(", Tot. Time: {0}:{1}", 
                                 //    (int)totPlaylistTime/60, (int)totPlaylistTime % 60);
@@ -218,6 +231,7 @@ namespace GoStreamAudioGUI
                             {
                                 lblPlistInfo.Text = string.Format("{0} files.", 0);
                             }
+                            PlaylistLoaded(this, null);
                         };
                         Invoke(action);
                     });
@@ -338,7 +352,7 @@ namespace GoStreamAudioGUI
                         this.btnClear.Enabled = true;
                         this.btnSave.Enabled = true;
 
-                        PlaylistLoaded(this, null);
+                        //PlaylistLoaded(this, null);
                         //lblPlistInfo.Text += string.Format(", Total Time: {0}:{1}", 
                         //    (int)totPlaylistTime / 60, (int)totPlaylistTime % 60);
                         //StartPlaying(l.Items[0].Text, 0);
@@ -347,6 +361,7 @@ namespace GoStreamAudioGUI
                     {
                         lblPlistInfo.Text = string.Format("{0} files.", 0);
                     }
+                    PlaylistLoaded(this, null);
                 }
             }
         }
@@ -534,6 +549,14 @@ namespace GoStreamAudioGUI
                 handler(this, e);
         }
 
+        public event EventHandler PlaylistCleared;
+        protected virtual void OnPlaylistCleared(EventArgs e)
+        {
+            var handler = PlaylistCleared;
+            if (handler != null)
+                handler(this, e);
+        }
+
         private void l_MouseDoubleClick(object sender, MouseEventArgs e)
         {
             ListViewHitTestInfo info = l.HitTest(e.X, e.Y);
@@ -634,6 +657,7 @@ namespace GoStreamAudioGUI
                 lblPlistInfo.Text = "";
                 this.btnClear.Enabled = this.btnSave.Enabled = false;
             }
+            OnPlaylistCleared(e);
         }
 
         //private void audioPropertiesToolStripMenuItem_Click(object sender, EventArgs e)

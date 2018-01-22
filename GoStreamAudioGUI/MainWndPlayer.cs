@@ -33,6 +33,9 @@ namespace GoStreamAudioGUI
         private System.Timers.Timer aTimer;
         private PlayListWnd plWnd;
         private volatile bool mIsPlaylistRunning = false;
+        private volatile bool mIsShuffleChecked = false;
+        private List<PlayListEntry> randSongsIdx;
+        private int shuffleCnt = 0;
 
         private System.Resources.ResourceManager rm;
         
@@ -115,12 +118,16 @@ namespace GoStreamAudioGUI
             plWnd.CloseButtonClicked += plWnd_CloseButtonClicked;
             plWnd.PlaylistItemDoubleClicked += plWnd_PlaylistItemDoubleClicked;
             plWnd.PlaylistLoaded += plWnd_PlaylistLoaded;
+            plWnd.PlaylistCleared += plWnd_PlaylistCleared;
             plWnd.Show(this);
 
             lblTotalTime.Text = "00:00";
             tbAudioPos.Enabled = false;
 
             EnableButtons(false);
+            btnRew.Enabled = btnFwd.Enabled = false;
+            chkShuffle.Enabled = false;
+            marqueeLbl.Visible = false;
             //PopulateOutputDriverCombo();
             
             aTimer = new System.Timers.Timer();
@@ -131,6 +138,8 @@ namespace GoStreamAudioGUI
 
             rm = new System.Resources.ResourceManager(typeof(GoStreamAudioGUI.MainWndPlayer));
             this.Text = rm.GetString("MainWndPlayer.Text");
+
+            toolTipShuffle.SetToolTip(this.chkShuffle, rm.GetString("toolTipShuffle.Title"));
 
             //cultInfo = LocalizedForm.GlobalUICulture;
             if (LocalizedForm.GlobalUICulture.TwoLetterISOLanguageName != "en")
@@ -147,15 +156,48 @@ namespace GoStreamAudioGUI
             BringToFront();
         }
 
+        void plWnd_PlaylistCleared(object sender, EventArgs e)
+        {
+            Action action = () =>
+            {
+                btnRew.Enabled = false;
+                btnFwd.Enabled = false;
+                //chkRepeat.Enabled = false;
+                chkShuffle.Enabled =false;
+                //marqueeLbl.Visible = false;
+                if (chkShuffle.Checked)
+                    chkShuffle.Checked = !chkShuffle.Checked;
+            };
+            Invoke(action);
+        }
+
         void plWnd_PlaylistLoaded(object sender, EventArgs e)
-        {                        
-            plWnd.LastFileIdx = -1;
+        {
+            plWnd.LastFileIdx = -1;  //0
             Action action = () =>
                 {
-                    btnRew.Enabled = true;
-                    btnFwd.Enabled = true;
+                    bool btnState = false;
+                    if (plWnd.GetPlaylistSize() > 0)
+                        btnState = true;
+                    btnRew.Enabled = btnState;
+                    btnFwd.Enabled = btnState;
+                    //chkRepeat.Enabled = btnState;
+                    chkShuffle.Enabled = btnState;
+                    //marqueeLbl.Visible = btnState;
                 };
             Invoke(action);
+            if (plWnd.GetPlaylistSize() > 0)
+            {
+                randSongsIdx = PlayListShuffler.ComputedRandomOrder(plWnd.PlayListItems);
+                shuffleCnt = 0;
+                //int cnt = 0;
+                //foreach (PlayListEntry sngIdx in randSongsIdx)
+                //{
+                //    ++cnt;
+                //    Debug.WriteLine(string.Format("-- {0}. {1} - {2} (has played = {3}", 
+                //        cnt, sngIdx.PosInPlayList, sngIdx.FileName, sngIdx.HasPlayedOnce));
+                //}
+            }
         }
       
         #region Private methods
@@ -223,9 +265,11 @@ namespace GoStreamAudioGUI
                             lastPlayDirectory = Path.GetDirectoryName(openSFileDlg.FileName);
                             if (IsPlaylistRunning)
                             {
+                                CurrentTrackCompleted(this, null);
                                 IsPlaylistRunning = false;
                                 plWnd.LastFileIdx = -1;
-                                //btnRew.Enabled = btnFwd.Enabled = false;
+                                chkRepeat.Enabled = chkShuffle.Enabled = false;
+                                btnRew.Enabled = btnFwd.Enabled = false;
                                 marqueeLbl.Visible = false;
                             }
                         }
@@ -534,7 +578,7 @@ namespace GoStreamAudioGUI
                 {
                     bool hasSelFile = SelectInputFile();
                     if (hasSelFile)
-                    {
+                    {                        
                         if (isWaitingHandle)
                         {
                             isWaitingHandle = false;
@@ -587,6 +631,7 @@ namespace GoStreamAudioGUI
             {
                 Action action = () =>
                 {
+                    marqueeLbl.Invalidate();
                     marqueeLbl.Text = currentAudioFile.FileName;
                     marqueeLbl.Width = this.Width + currentAudioFile.FileName.Length + 5;
                     marqueeLbl.ResetPosition(this.Width - currentAudioFile.FileName.Length - 20);
@@ -601,8 +646,22 @@ namespace GoStreamAudioGUI
             if (File.Exists(mAudioFile))
             {
                 plWnd.HasUserSelTrack = true;
+                chkShuffle.Enabled = true;
                 currentAudioFile = plWnd.GetFileToPlay(plWnd.LastFileIdx);
                 UpdateMarquee();
+                if (audioPlayer != null && audioPlayer.IsStopped())
+                {
+                    if (!isWaitingHandle)
+                    {
+                        InitPlayer();
+                        StartPlaybackThread();
+                        userStopped = false;
+                    }
+                    if (isSingleFilePlaying)
+                        isSingleFilePlaying = false;
+                }
+                Action action = () => btnRew.Enabled = btnFwd.Enabled = true;
+                Invoke(action);
             }
             //if (audioPlayer != null)
             //    audioPlayer.PlaybackStopType = PlaybackStopTypes.PlaybackStoppedByUser;
@@ -750,7 +809,17 @@ namespace GoStreamAudioGUI
                             else
                             {
                                 CurrentTrackCompleted(this, e);
-                                aPos = plWnd.LastFileIdx + 1;
+                                if (!mIsShuffleChecked)
+                                {
+                                    aPos = plWnd.LastFileIdx + 1;
+                                }
+                                else
+                                {
+                                    aPos = randSongsIdx[((shuffleCnt + 1)) % plWnd.GetPlaylistSize()].PosInPlayList;
+                                    ++shuffleCnt;
+                                    if (shuffleCnt == plWnd.GetPlaylistSize())
+                                        shuffleCnt = 0;
+                                }
                                 plWnd.LastFileIdx = aPos;                                
                             }
 
@@ -973,10 +1042,11 @@ namespace GoStreamAudioGUI
                 if (plWnd.LastFileIdx > 0)
                 {
                     CurrentTrackCompleted(sender, e);
-                    
+
                     if (bgPlayWorker.IsBusy && isWaitingHandle)
                     {
-                        plWnd.LastFileIdx -= 2;
+                        if (!mIsShuffleChecked)
+                            plWnd.LastFileIdx -= 2;
                         isWaitingHandle = false;
                         //audioPlayer.PlaybackStopType = PlaybackStopTypes.PlaybackStoppedByUser;
                         waitHandle.Set();
@@ -984,8 +1054,17 @@ namespace GoStreamAudioGUI
                             UpdateMarquee();
                     }
                     else
-                    {                        
-                        if (ResetPlayList(sender, e, plWnd.LastFileIdx - 1))
+                    {
+                        int nextPos = -1;
+                        if (!mIsShuffleChecked)
+                        {
+                            nextPos = plWnd.LastFileIdx - 1;
+                        }
+                        else
+                        {
+                            nextPos = randSongsIdx[plWnd.LastFileIdx].PosInPlayList;
+                        }
+                        if (ResetPlayList(sender, e, nextPos))
                         {
                             IsPlaylistRunning = true;
                             audioPlayer.PlaybackStopType = PlaybackStopTypes.PlaybackStoppedReachingEndOfFile;
@@ -995,10 +1074,43 @@ namespace GoStreamAudioGUI
                         }
                     }
                 }
+                else
+                {
+                    if (plWnd.LastFileIdx == 0 && mIsShuffleChecked)
+                    {
+                        CurrentTrackCompleted(sender, e);
+
+                        //plWnd.LastFileIdx = plWnd.GetPlaylistSize() - 1;
+                        if (bgPlayWorker.IsBusy && isWaitingHandle)
+                        {
+                            isWaitingHandle = false;
+                            //audioPlayer.PlaybackStopType = PlaybackStopTypes.PlaybackStoppedByUser;
+                            waitHandle.Set();
+                            if (File.Exists(mAudioFile))
+                                UpdateMarquee();
+                        }
+                        else
+                        {
+                            if (ResetPlayList(sender, e, plWnd.GetPlaylistSize() - 1))
+                            {
+                                IsPlaylistRunning = true;
+                                audioPlayer.PlaybackStopType = PlaybackStopTypes.PlaybackStoppedReachingEndOfFile;
+                                userStopped = false;
+                                currentAudioFile = plWnd.GetFileToPlay(plWnd.LastFileIdx);
+                                UpdateMarquee();
+                            }
+                        }
+                    }
+                }
             }
             else
             {
-                if (ResetPlayList(sender, e, 0))
+                int aPos = -1;
+                if (!mIsShuffleChecked)
+                    aPos = 0;
+                else
+                    aPos = randSongsIdx[0].PosInPlayList;
+                if (ResetPlayList(sender, e, aPos))
                 {
                     IsPlaylistRunning = true;
                     audioPlayer.PlaybackStopType = PlaybackStopTypes.PlaybackStoppedReachingEndOfFile;
@@ -1008,7 +1120,7 @@ namespace GoStreamAudioGUI
                 }
             }
         }
-        
+
         private void btnFwd_Click(object sender, EventArgs e)
         {
             if (isSingleFilePlaying)
@@ -1027,21 +1139,63 @@ namespace GoStreamAudioGUI
                             UpdateMarquee();
                     }
                     else
-                    {                        
-                        if (ResetPlayList(sender, e, plWnd.LastFileIdx + 1))
+                    {
+                        int nextPos = -1;
+                        if (!mIsShuffleChecked)
                         {
-                            IsPlaylistRunning = true;                            
+                            nextPos = plWnd.LastFileIdx + 1;
+                        }
+                        else
+                        {
+                            nextPos = randSongsIdx[plWnd.LastFileIdx].PosInPlayList;
+                        }
+                        if (ResetPlayList(sender, e, nextPos))
+                        {
+                            IsPlaylistRunning = true;
                             audioPlayer.PlaybackStopType = PlaybackStopTypes.PlaybackStoppedReachingEndOfFile;
                             userStopped = false;
                             currentAudioFile = plWnd.GetFileToPlay(plWnd.LastFileIdx);
                             UpdateMarquee();
                         }
-                    }                    
+                    }
+                }
+                else
+                {
+                    if (plWnd.LastFileIdx == plWnd.GetPlaylistSize() - 1 && mIsShuffleChecked)
+                    {
+                        CurrentTrackCompleted(sender, e);
+
+                        //plWnd.LastFileIdx = plWnd.GetPlaylistSize() - 1;
+                        if (bgPlayWorker.IsBusy && isWaitingHandle)
+                        {
+                            isWaitingHandle = false;
+                            //audioPlayer.PlaybackStopType = PlaybackStopTypes.PlaybackStoppedByUser;
+                            waitHandle.Set();
+                            if (File.Exists(mAudioFile))
+                                UpdateMarquee();
+                        }
+                        else
+                        {
+                            if (ResetPlayList(sender, e, 0))
+                            {
+                                IsPlaylistRunning = true;
+                                audioPlayer.PlaybackStopType = PlaybackStopTypes.PlaybackStoppedReachingEndOfFile;
+                                userStopped = false;
+                                currentAudioFile = plWnd.GetFileToPlay(plWnd.LastFileIdx);
+                                UpdateMarquee();
+                            }
+                        }
+                    }
                 }
             }
             else
             {
-                if (ResetPlayList(sender, e, 0))
+                int aPos = -1;
+                if (!mIsShuffleChecked)
+                    aPos = 0;
+                else
+                    aPos = randSongsIdx[0].PosInPlayList;
+                if (ResetPlayList(sender, e, aPos))
                 {
                     IsPlaylistRunning = true;
                     audioPlayer.PlaybackStopType = PlaybackStopTypes.PlaybackStoppedReachingEndOfFile;
@@ -1050,6 +1204,11 @@ namespace GoStreamAudioGUI
                     UpdateMarquee();
                 }
             }
+        }
+
+        private void chkShuffle_CheckedChanged(object sender, EventArgs e)
+        {
+            mIsShuffleChecked = chkShuffle.Checked;
         }       
     }
 }

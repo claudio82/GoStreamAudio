@@ -210,7 +210,7 @@
     <value>$this</value>
   </data>
   <data name="&gt;&gt;menuStrip1.ZOrder" xml:space="preserve">
-    <value>14</value>
+    <value>16</value>
   </data>
   <data name="openSFileDlg.TrayLocation" type="System.Drawing.Point, System.Drawing">
     <value>132, 17</value>
@@ -243,7 +243,7 @@
     <value>$this</value>
   </data>
   <data name="&gt;&gt;lblNowTime.ZOrder" xml:space="preserve">
-    <value>11</value>
+    <value>13</value>
   </data>
   <data name="lblTotalTime.AutoSize" type="System.Boolean, mscorlib">
     <value>True</value>
@@ -267,7 +267,7 @@
     <value>$this</value>
   </data>
   <data name="&gt;&gt;lblTotalTime.ZOrder" xml:space="preserve">
-    <value>10</value>
+    <value>12</value>
   </data>
   <data name="comboBoxOutputDriver.Location" type="System.Drawing.Point, System.Drawing">
     <value>13, 167</value>
@@ -291,7 +291,7 @@
     <value>$this</value>
   </data>
   <data name="&gt;&gt;comboBoxOutputDriver.ZOrder" xml:space="preserve">
-    <value>9</value>
+    <value>11</value>
   </data>
   <data name="lblAudioDriver.AutoSize" type="System.Boolean, mscorlib">
     <value>True</value>
@@ -321,7 +321,7 @@
     <value>$this</value>
   </data>
   <data name="&gt;&gt;lblAudioDriver.ZOrder" xml:space="preserve">
-    <value>8</value>
+    <value>10</value>
   </data>
   <data name="bgPlayWorker.TrayLocation" type="System.Drawing.Point, System.Drawing">
     <value>255, 17</value>
@@ -345,7 +345,7 @@
     <value>$this</value>
   </data>
   <data name="&gt;&gt;tbVolume.ZOrder" xml:space="preserve">
-    <value>7</value>
+    <value>9</value>
   </data>
   <data name="lblVolume.AutoSize" type="System.Boolean, mscorlib">
     <value>True</value>
@@ -372,7 +372,7 @@
     <value>$this</value>
   </data>
   <data name="&gt;&gt;lblVolume.ZOrder" xml:space="preserve">
-    <value>6</value>
+    <value>8</value>
   </data>
   <data name="lblSep.AutoSize" type="System.Boolean, mscorlib">
     <value>True</value>
@@ -399,10 +399,7 @@
     <value>$this</value>
   </data>
   <data name="&gt;&gt;lblSep.ZOrder" xml:space="preserve">
-    <value>5</value>
-  </data>
-  <data name="btnRew.Enabled" type="System.Boolean, mscorlib">
-    <value>False</value>
+    <value>7</value>
   </data>
   <data name="btnRew.Location" type="System.Drawing.Point, System.Drawing">
     <value>221, 78</value>
@@ -423,10 +420,7 @@
     <value>$this</value>
   </data>
   <data name="&gt;&gt;btnRew.ZOrder" xml:space="preserve">
-    <value>4</value>
-  </data>
-  <data name="btnFwd.Enabled" type="System.Boolean, mscorlib">
-    <value>False</value>
+    <value>6</value>
   </data>
   <data name="btnFwd.Location" type="System.Drawing.Point, System.Drawing">
     <value>276, 78</value>
@@ -447,7 +441,7 @@
     <value>$this</value>
   </data>
   <data name="&gt;&gt;btnFwd.ZOrder" xml:space="preserve">
-    <value>3</value>
+    <value>5</value>
   </data>
   <data name="tbAudioPos.AutoSize" type="System.Boolean, mscorlib">
     <value>False</value>
@@ -471,7 +465,7 @@
     <value>$this</value>
   </data>
   <data name="&gt;&gt;tbAudioPos.ZOrder" xml:space="preserve">
-    <value>2</value>
+    <value>4</value>
   </data>
   <data name="btnPause.Enabled" type="System.Boolean, mscorlib">
     <value>False</value>
@@ -495,7 +489,7 @@
     <value>$this</value>
   </data>
   <data name="&gt;&gt;btnPause.ZOrder" xml:space="preserve">
-    <value>1</value>
+    <value>3</value>
   </data>
   <data name="btnStop.Location" type="System.Drawing.Point, System.Drawing">
     <value>87, 74</value>
@@ -516,7 +510,7 @@
     <value>$this</value>
   </data>
   <data name="&gt;&gt;btnStop.ZOrder" xml:space="preserve">
-    <value>12</value>
+    <value>14</value>
   </data>
   <data name="btnPlay.Location" type="System.Drawing.Point, System.Drawing">
     <value>15, 74</value>
@@ -537,7 +531,7 @@
     <value>$this</value>
   </data>
   <data name="&gt;&gt;btnPlay.ZOrder" xml:space="preserve">
-    <value>13</value>
+    <value>15</value>
   </data>
   <data name="marqueeLbl.Location" type="System.Drawing.Point, System.Drawing">
     <value>28, 54</value>
@@ -547,9 +541,6 @@
   </data>
   <data name="marqueeLbl.TabIndex" type="System.Int32, mscorlib">
     <value>26</value>
-  </data>
-  <data name="marqueeLbl.Visible" type="System.Boolean, mscorlib">
-    <value>False</value>
   </data>
   <data name="&gt;&gt;marqueeLbl.Name" xml:space="preserve">
     <value>marqueeLbl</value>
@@ -561,7 +552,80 @@
     <value>$this</value>
   </data>
   <data name="&gt;&gt;marqueeLbl.ZOrder" xml:space="preserve">
+    <value>2</value>
+  </data>
+  <assembly alias="System.Windows.Forms" name="System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089" />
+  <data name="chkRepeat.Appearance" type="System.Windows.Forms.Appearance, System.Windows.Forms">
+    <value>Button</value>
+  </data>
+  <data name="chkRepeat.AutoSize" type="System.Boolean, mscorlib">
+    <value>True</value>
+  </data>
+  <data name="chkRepeat.Enabled" type="System.Boolean, mscorlib">
+    <value>False</value>
+  </data>
+  <data name="chkRepeat.Location" type="System.Drawing.Point, System.Drawing">
+    <value>244, 112</value>
+  </data>
+  <data name="chkRepeat.MinimumSize" type="System.Drawing.Size, System.Drawing">
+    <value>26, 26</value>
+  </data>
+  <data name="chkRepeat.Size" type="System.Drawing.Size, System.Drawing">
+    <value>26, 26</value>
+  </data>
+  <data name="chkRepeat.TabIndex" type="System.Int32, mscorlib">
+    <value>27</value>
+  </data>
+  <data name="chkRepeat.Visible" type="System.Boolean, mscorlib">
+    <value>False</value>
+  </data>
+  <data name="&gt;&gt;chkRepeat.Name" xml:space="preserve">
+    <value>chkRepeat</value>
+  </data>
+  <data name="&gt;&gt;chkRepeat.Type" xml:space="preserve">
+    <value>System.Windows.Forms.CheckBox, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
+  <data name="&gt;&gt;chkRepeat.Parent" xml:space="preserve">
+    <value>$this</value>
+  </data>
+  <data name="&gt;&gt;chkRepeat.ZOrder" xml:space="preserve">
+    <value>1</value>
+  </data>
+  <data name="chkShuffle.Appearance" type="System.Windows.Forms.Appearance, System.Windows.Forms">
+    <value>Button</value>
+  </data>
+  <data name="chkShuffle.AutoSize" type="System.Boolean, mscorlib">
+    <value>True</value>
+  </data>
+  <data name="chkShuffle.ImeMode" type="System.Windows.Forms.ImeMode, System.Windows.Forms">
+    <value>NoControl</value>
+  </data>
+  <data name="chkShuffle.Location" type="System.Drawing.Point, System.Drawing">
+    <value>276, 112</value>
+  </data>
+  <data name="chkShuffle.MinimumSize" type="System.Drawing.Size, System.Drawing">
+    <value>26, 26</value>
+  </data>
+  <data name="chkShuffle.Size" type="System.Drawing.Size, System.Drawing">
+    <value>26, 26</value>
+  </data>
+  <data name="chkShuffle.TabIndex" type="System.Int32, mscorlib">
+    <value>28</value>
+  </data>
+  <data name="&gt;&gt;chkShuffle.Name" xml:space="preserve">
+    <value>chkShuffle</value>
+  </data>
+  <data name="&gt;&gt;chkShuffle.Type" xml:space="preserve">
+    <value>System.Windows.Forms.CheckBox, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
+  <data name="&gt;&gt;chkShuffle.Parent" xml:space="preserve">
+    <value>$this</value>
+  </data>
+  <data name="&gt;&gt;chkShuffle.ZOrder" xml:space="preserve">
     <value>0</value>
+  </data>
+  <data name="toolTipShuffle.TrayLocation" type="System.Drawing.Point, System.Drawing">
+    <value>383, 17</value>
   </data>
   <data name="$this.Localizable" type="System.Boolean, mscorlib">
     <value>True</value>
@@ -1103,7 +1167,6 @@
   <data name="$this.MinimumSize" type="System.Drawing.Size, System.Drawing">
     <value>355, 233</value>
   </data>
-  <assembly alias="System.Windows.Forms" name="System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089" />
   <data name="$this.StartPosition" type="System.Windows.Forms.FormStartPosition, System.Windows.Forms">
     <value>Manual</value>
   </data>
@@ -1185,13 +1248,19 @@
   <data name="&gt;&gt;bgPlayWorker.Type" xml:space="preserve">
     <value>System.ComponentModel.BackgroundWorker, System, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </data>
+  <data name="&gt;&gt;toolTipShuffle.Name" xml:space="preserve">
+    <value>toolTipShuffle</value>
+  </data>
+  <data name="&gt;&gt;toolTipShuffle.Type" xml:space="preserve">
+    <value>System.Windows.Forms.ToolTip, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </data>
   <data name="&gt;&gt;$this.Name" xml:space="preserve">
     <value>MainWndPlayer</value>
   </data>
   <data name="&gt;&gt;$this.Type" xml:space="preserve">
     <value>GoStreamAudioGUI.LocalizedForm, GoStreamAudioGUI, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null</value>
   </data>
-  <data name="MainWndPlayer.Text" xml:space="preserve">
-    <value>GoStreamAudio</value>
+  <data name="toolTipShuffle.Title" xml:space="preserve">
+    <value>Shuffle</value>
   </data>
 </root>
