@@ -4,7 +4,6 @@ using System.Diagnostics;
 using System.IO;
 using System.Net;
 using System.Threading;
-using System.Threading.Tasks;
 
 namespace GoStreamAudioLib
 {
@@ -63,7 +62,7 @@ namespace GoStreamAudioLib
         public void StreamMp3()
         {
             fullyDownloaded = false;
-            if (audioUrl != null && !string.IsNullOrWhiteSpace(audioUrl))
+            if (audioUrl != null && !string.IsNullOrEmpty(audioUrl))
             {
                 try
                 {

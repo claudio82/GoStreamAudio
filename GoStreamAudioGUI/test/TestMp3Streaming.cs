@@ -5,7 +5,6 @@ using System.Data;
 using System.Drawing;
 using System.Net;
 using System.Threading;
-using System.Threading.Tasks;
 using System.Windows.Forms;
 
 namespace GoStreamAudioGUI
@@ -27,7 +26,7 @@ namespace GoStreamAudioGUI
         {
             if (audioPlayer.StreamingPlaybackState == StreamingPlaybackState.Stopped)
             {
-                if (txtAudioUrl.Text != null && !string.IsNullOrWhiteSpace(txtAudioUrl.Text))
+                if (txtAudioUrl.Text != null && !string.IsNullOrEmpty(txtAudioUrl.Text))
                 {
                     audioPlayer.AudioUrl = txtAudioUrl.Text;
                     audioPlayer.StreamingPlaybackState = StreamingPlaybackState.Buffering;

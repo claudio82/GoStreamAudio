@@ -9,7 +9,7 @@ using System.IO;
 using System.Threading;
 //using System.Linq;
 //using System.Text;
-using System.Threading.Tasks;
+//using System.Threading.Tasks;
 using System.Timers;
 using System.Windows.Forms;
 
@@ -316,7 +316,7 @@ namespace GoStreamAudioGUI
                 audioPlayer =
                         new LocalAudioPlayer(mAudioFile, GetSelectedOutputDriver());
                 audioPlayer.PlaybackStopType = pbStopType; //PlaybackStopTypes.PlaybackStoppedReachingEndOfFile;
-                audioPlayer.PlaybackPaused += audioPlayer_PlaybackPaused;
+                //audioPlayer.PlaybackPaused += audioPlayer_PlaybackPaused;
                 audioPlayer.PlaybackResumed += audioPlayer_PlaybackResumed;
                 audioPlayer.PlaybackStopped += audioPlayer_PlaybackStopped;
             }
@@ -376,10 +376,10 @@ namespace GoStreamAudioGUI
             //hasResumed = true;
         }
 
-        private void audioPlayer_PlaybackPaused()
-        {
+        //private void audioPlayer_PlaybackPaused()
+        //{
             
-        }
+        //}
 
         /// <summary>
         /// starts audio file playback
@@ -547,7 +547,7 @@ namespace GoStreamAudioGUI
             if (waitHandle != null)
             {
                 waitHandle.Close();
-                waitHandle.Dispose();
+                //waitHandle.Dispose();
                 waitHandle = null;
             }
 

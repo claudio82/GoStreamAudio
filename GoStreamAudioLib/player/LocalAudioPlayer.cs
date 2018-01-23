@@ -277,7 +277,7 @@ namespace GoStreamAudioLib
         #region Public Events
 
         public event Action PlaybackResumed;
-        public event Action PlaybackPaused;
+        //public event Action PlaybackPaused;
         public event Action PlaybackStopped;
 
         #endregion
