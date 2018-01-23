@@ -18,7 +18,7 @@ Supported playlist formats: M3U
 
 # Build and Test
 To compile the following is required:
-- .NET 4.5 and Visual Studio 2013
+- .NET 3.5 and Visual Studio 2013
 
 # Contribute
 Feel free to contribute if you like. 
