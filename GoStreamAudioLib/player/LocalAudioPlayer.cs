@@ -155,9 +155,14 @@ namespace GoStreamAudioLib
             if (wavePlayer != null)
             {
                 wavePlayer.Stop();
-                if (file != null) file.Position = 0L;
+
+                if (file != null)
+                {
+                    file.Position = 0L;
+                }
                 if (vorbisReader != null) vorbisReader.Position = 0L;
                 if (flacReader != null) flacReader.Position = 0L;
+                              
             }
         }
 
@@ -262,6 +267,36 @@ namespace GoStreamAudioLib
             }
         }
 
+        public void SaveMp3Tag(TagLib.File taglibFile)
+        {
+            if (taglibFile != null)
+            {
+                //string fName = file.FileName;
+                //AudioFileReader prev = file;
+                if (file != null)
+                {
+                    float curVol = file.Volume;
+                    wavePlayer.Stop();
+                    //wavePlayer.Dispose();
+                    //file.Close();
+                    //file.Dispose();
+
+                    string prevFile = this.file.FileName;
+                    
+                    this.file.Close();
+                    this.file.Dispose();
+                    this.file = null;
+                    
+                    taglibFile.Save();
+                    
+                    this.file = new AudioFileReader(prevFile);                    
+                    wavePlayer.Init(file);
+                    SetVolume(curVol);                    
+                    //wavePlayer.Play();
+                }
+            }
+        }
+
         //public AudioReaderType GetReaderType()
         //{
         //    if (file != null)
@@ -302,6 +337,20 @@ namespace GoStreamAudioLib
             }
         }
         #endregion
+
+        public void CloseFile()
+        {
+            if (this.wavePlayer != null)
+            {
+                this.wavePlayer.Stop();
+            }
+            if (this.file != null)
+            {
+                this.file.Close();
+                this.file.Dispose();
+                this.file = null;
+            }
+        }
 
         public void Dispose()
         {

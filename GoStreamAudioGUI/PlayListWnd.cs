@@ -446,16 +446,19 @@ namespace GoStreamAudioGUI
             bool canPlay = false;
             parent.EnableButtons(false);
             if (parent.IsWaitingHandle)
-            {
+            {                
+                //parent.IsPlaylistRunning = true;
                 parent.IsWaitingHandle = false;
-                parent.WaitHandle.Set();
+                parent.WaitHandle.Set();                
             }
+            
             if (File.Exists(fName))
-            {
+            {                
                 parent.AudioFile = fName;
                 parent.InitPlayer();
                 parent.InitBgWorker();
                 parent.StartPlaybackThread();
+                
                 canPlay = true;
             }
             else
@@ -565,18 +568,17 @@ namespace GoStreamAudioGUI
             {
                 if (lastFileIdx >= 0)
                     l.Items[lastFileIdx].ForeColor = l.Items[lastFileIdx].SubItems[1].ForeColor = Color.Black;
-                hasUserSelTrack = true;
-               
+
                 lastFileIdx = item.Index;
                 parent.UserStopped = false;
                 AudioFileInfo afInfo = GetAudioFileInfo(item);
                 if (StartPlaying(afInfo.FullPath, lastFileIdx))
                 {
                     item.ForeColor = item.SubItems[1].ForeColor = Color.Blue;
-                    parent.IsPlaylistRunning = true;
+                    //parent.IsPlaylistRunning = true;
 
                     if (parent.AudioPlayer != null)
-                    {
+                    {                        
                         if (l.Items[lastFileIdx].SubItems[1].Text == "")
                         {
                             l.Items[lastFileIdx].SubItems[1].Text = Utils.FormatTimeSpan2(parent.AudioPlayer.GetTotalTime());

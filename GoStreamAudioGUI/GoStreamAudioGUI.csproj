@@ -51,8 +51,15 @@
     <ApplicationIcon>img\player.ico</ApplicationIcon>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="policy.2.0.taglib-sharp, Version=0.0.0.0, Culture=neutral, PublicKeyToken=db62eba44689b5b0, processorArchitecture=MSIL">
+      <HintPath>..\packages\taglib.2.1.0.0\lib\policy.2.0.taglib-sharp.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
     <Reference Include="System" />
+    <Reference Include="System.Configuration.Install" />
     <Reference Include="System.Core" />
+    <Reference Include="System.Management" />
+    <Reference Include="System.Web" />
     <Reference Include="System.Xml.Linq" />
     <Reference Include="System.Data.DataSetExtensions" />
     <Reference Include="System.Data" />
@@ -60,6 +67,10 @@
     <Reference Include="System.Drawing" />
     <Reference Include="System.Windows.Forms" />
     <Reference Include="System.Xml" />
+    <Reference Include="taglib-sharp, Version=2.1.0.0, Culture=neutral, PublicKeyToken=db62eba44689b5b0, processorArchitecture=MSIL">
+      <HintPath>..\packages\taglib.2.1.0.0\lib\taglib-sharp.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
   </ItemGroup>
   <ItemGroup>
     <Compile Include="formControls\AppMenuStrip.cs">
@@ -71,11 +82,20 @@
     <Compile Include="formControls\MarqueeLabel.cs">
       <SubType>Component</SubType>
     </Compile>
+    <Compile Include="installer\CustomInstaller.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="installer\CustomInstaller.Designer.cs">
+      <DependentUpon>CustomInstaller.cs</DependentUpon>
+    </Compile>
     <Compile Include="MainWndPlayer.cs">
       <SubType>Form</SubType>
     </Compile>
     <Compile Include="MainWndPlayer.Designer.cs">
       <DependentUpon>MainWndPlayer.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Mp3TagManager.cs">
+      <SubType>Form</SubType>
     </Compile>
     <Compile Include="PlayListEntry.cs" />
     <Compile Include="PlayListShuffler.cs" />
@@ -84,6 +104,12 @@
     </Compile>
     <Compile Include="PlayListWnd.Designer.cs">
       <DependentUpon>PlayListWnd.cs</DependentUpon>
+    </Compile>
+    <Compile Include="test\TestAlbumArt.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="test\TestAlbumArt.Designer.cs">
+      <DependentUpon>TestAlbumArt.cs</DependentUpon>
     </Compile>
     <Compile Include="test\TestMp3Streaming.cs">
       <SubType>Form</SubType>
@@ -94,6 +120,9 @@
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Utils.cs" />
+    <EmbeddedResource Include="formControls\MarqueeLabel.resx">
+      <DependentUpon>MarqueeLabel.cs</DependentUpon>
+    </EmbeddedResource>
     <EmbeddedResource Include="MainWndPlayer.it-IT.resx">
       <DependentUpon>MainWndPlayer.cs</DependentUpon>
     </EmbeddedResource>
@@ -105,6 +134,9 @@
     </EmbeddedResource>
     <EmbeddedResource Include="PlayListWnd.resx">
       <DependentUpon>PlayListWnd.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="test\TestAlbumArt.resx">
+      <DependentUpon>TestAlbumArt.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="test\TestMp3Streaming.resx">
       <DependentUpon>TestMp3Streaming.cs</DependentUpon>
@@ -119,6 +151,7 @@
       <DependentUpon>Resources.resx</DependentUpon>
       <DesignTime>True</DesignTime>
     </Compile>
+    <None Include="packages.config" />
     <None Include="Properties\Settings.settings">
       <Generator>SettingsSingleFileGenerator</Generator>
       <LastGenOutput>Settings.Designer.cs</LastGenOutput>
@@ -165,12 +198,6 @@
     <None Include="img\stop.png" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="img\player32.ico" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="img\player16.ico" />
-  </ItemGroup>
-  <ItemGroup>
     <None Include="img\player.ico" />
   </ItemGroup>
   <ItemGroup>
@@ -184,6 +211,9 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="img\shuffle.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="img\noPic.png" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

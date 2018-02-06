@@ -270,7 +270,7 @@ namespace GoStreamAudioGUI
                                 plWnd.LastFileIdx = -1;
                                 chkRepeat.Enabled = chkShuffle.Enabled = false;
                                 btnRew.Enabled = btnFwd.Enabled = false;
-                                marqueeLbl.Visible = false;
+                                //marqueeLbl.Visible = false;
                             }
                         }
                     }));
@@ -289,7 +289,7 @@ namespace GoStreamAudioGUI
         /// <summary>
         /// init the audio player
         /// </summary>
-        public void InitPlayer(PlaybackStopTypes pbStopType = PlaybackStopTypes.PlaybackStoppedReachingEndOfFile)
+        public void InitPlayer(bool dispose = true, PlaybackStopTypes pbStopType = PlaybackStopTypes.PlaybackStoppedReachingEndOfFile)
         {            
             if (aTimer.Enabled)
             {
@@ -298,27 +298,41 @@ namespace GoStreamAudioGUI
             }
             
             Action action;
-            action = () =>
-                {
+            //action = () =>
+            //    {
                     if (audioPlayer != null)
                     {
-                        //waitHandle.Set();
+                    //waitHandle.Set();
                         if (audioPlayer.IsPlaying() || audioPlayer.IsPaused())
                         {
                             audioPlayer.StopPlayback();
                         }
-                        audioPlayer.Dispose();
+                        while (isWaitingHandle)
+                        {
+                        }
+                        audioPlayer.PlaybackResumed -= audioPlayer_PlaybackResumed;
+                        audioPlayer.PlaybackStopped -= audioPlayer_PlaybackStopped;
+                        if (dispose)
+                        {
+                            audioPlayer.Dispose();
+                            audioPlayer = null;
+                        }
+                        
                     }
-                };
-            Invoke(action);
+            //    };
+            //Invoke(action);
             try
             {
-                audioPlayer =
-                        new LocalAudioPlayer(mAudioFile, GetSelectedOutputDriver());
-                audioPlayer.PlaybackStopType = pbStopType; //PlaybackStopTypes.PlaybackStoppedReachingEndOfFile;
-                //audioPlayer.PlaybackPaused += audioPlayer_PlaybackPaused;
-                audioPlayer.PlaybackResumed += audioPlayer_PlaybackResumed;
-                audioPlayer.PlaybackStopped += audioPlayer_PlaybackStopped;
+                //if (audioPlayer == null)
+                
+                    audioPlayer =
+                            new LocalAudioPlayer(mAudioFile, GetSelectedOutputDriver());
+                    audioPlayer.PlaybackStopType = pbStopType;
+                    //audioPlayer.PlaybackPaused += audioPlayer_PlaybackPaused;
+                    audioPlayer.PlaybackResumed += audioPlayer_PlaybackResumed;
+                    audioPlayer.PlaybackStopped += audioPlayer_PlaybackStopped;
+                if (!IsPlaylistRunning)
+                    currentAudioFile = new AudioFileInfo(Path.GetFileName(mAudioFile), mAudioFile);
             }
             catch (Exception)
             {
@@ -350,13 +364,15 @@ namespace GoStreamAudioGUI
                 tbAudioPos.Invoke(action);
                 action = () =>
                 {
-                    if (IsPlaylistRunning)
+                    //if (IsPlaylistRunning)
                     {
                         if (currentAudioFile != null)
                         {
                             marqueeLbl.Text = currentAudioFile.FileName;
-                            marqueeLbl.Width = this.Width + currentAudioFile.FileName.Length + 5;
+                            marqueeLbl.Width = this.MinimumSize.Width + currentAudioFile.FileName.Length + 5;
                             marqueeLbl.Visible = true;
+                            marqueeLbl.FilePlayingFullPath = currentAudioFile.FullPath;
+                            marqueeLbl.AudioPlayer = this.audioPlayer;
                         }
                     }
                 };
@@ -459,12 +475,24 @@ namespace GoStreamAudioGUI
                 }
                 else
                 {
-                    if (audioPlayer.IsPaused())
+                    if (audioPlayer.IsPaused() || audioPlayer.IsStopped())
                     {
+
+                        if (!aTimer.Enabled)
+                        {
+                            aTimer.Enabled = true;
+                            aTimer.Start();
+                        }
+
                         //resume audio play
                         audioPlayer.Play();
-                        btnPause.Enabled = true;
-                        btnPlay.Enabled = false;
+                        Invoke((Action)(() =>
+                        {
+                            btnPause.Enabled = true;
+                            btnPlay.Enabled = false;
+                            btnStop.Enabled = true;
+                        }));
+                        
                     }
                 }
             }
@@ -563,8 +591,13 @@ namespace GoStreamAudioGUI
                 aTimer.Dispose();
                 aTimer = null;
             }
-            plWnd.Close();
+            if (marqueeLbl != null)
+                marqueeLbl.Dispose();            
             plWnd.CloseButtonClicked -= plWnd_CloseButtonClicked;
+            plWnd.PlaylistItemDoubleClicked -= plWnd_PlaylistItemDoubleClicked;
+            plWnd.PlaylistLoaded -= plWnd_PlaylistLoaded;
+            plWnd.PlaylistCleared -= plWnd_PlaylistCleared;
+            plWnd.Close();
             plWnd.Dispose();
         }
 
@@ -591,11 +624,11 @@ namespace GoStreamAudioGUI
                             StartPlaybackThread();
 
                             isSingleFilePlaying = true;
-                            Action action = () =>
-                                {
-                                    marqueeLbl.Visible = false;
-                                };
-                            Invoke(action);
+                            //Action action = () =>
+                            //    {
+                            //        marqueeLbl.Visible = false;
+                            //    };
+                            //Invoke(action);
                     }
                 });
             t.Priority = ThreadPriority.Lowest;
@@ -633,9 +666,11 @@ namespace GoStreamAudioGUI
                 {
                     marqueeLbl.Invalidate();
                     marqueeLbl.Text = currentAudioFile.FileName;
-                    marqueeLbl.Width = this.Width + currentAudioFile.FileName.Length + 5;
+                    marqueeLbl.Width = this.MinimumSize.Width + currentAudioFile.FileName.Length + 5;
                     marqueeLbl.ResetPosition(this.Width - currentAudioFile.FileName.Length - 20);
                     marqueeLbl.Visible = true;
+                    marqueeLbl.FilePlayingFullPath = currentAudioFile.FullPath;
+                    marqueeLbl.AudioPlayer = this.audioPlayer;
                 };
                 Invoke(action);
             }
@@ -645,23 +680,32 @@ namespace GoStreamAudioGUI
         {
             if (File.Exists(mAudioFile))
             {
+                IsPlaylistRunning = true;
                 plWnd.HasUserSelTrack = true;
                 chkShuffle.Enabled = true;
                 currentAudioFile = plWnd.GetFileToPlay(plWnd.LastFileIdx);
                 UpdateMarquee();
-                if (audioPlayer != null && audioPlayer.IsStopped())
+                if (audioPlayer != null)
                 {
-                    if (!isWaitingHandle)
+                    //audioPlayer.PlaybackStopType = PlaybackStopTypes.PlaybackStoppedByUser;
+                    if (audioPlayer.IsStopped())
                     {
-                        InitPlayer();
-                        StartPlaybackThread();
-                        userStopped = false;
+                        if (!isWaitingHandle)
+                        {
+                            //InitPlayer();
+                            //StartPlaybackThread();                            
+                            userStopped = false;
+                        }                        
                     }
                     if (isSingleFilePlaying)
                         isSingleFilePlaying = false;
-                }
-                Action action = () => btnRew.Enabled = btnFwd.Enabled = true;
-                Invoke(action);
+
+                    Action action = () =>
+                    {                        
+                        btnRew.Enabled = btnFwd.Enabled = true;
+                    };
+                    Invoke(action);
+                }                
             }
             //if (audioPlayer != null)
             //    audioPlayer.PlaybackStopType = PlaybackStopTypes.PlaybackStoppedByUser;
@@ -699,9 +743,45 @@ namespace GoStreamAudioGUI
             }
             else
             {
-                StartPlaybackThread();
-                //if (audioPlayer != null)
-                //    audioPlayer.PlaybackStopType = PlaybackStopTypes.PlaybackStoppedReachingEndOfFile;
+                try
+                {
+                    if (audioPlayer == null)
+                    {
+                        audioPlayer =
+                                new LocalAudioPlayer(mAudioFile, GetSelectedOutputDriver());
+                        audioPlayer.PlaybackStopType = PlaybackStopTypes.PlaybackStoppedReachingEndOfFile;
+                        //audioPlayer.PlaybackPaused += audioPlayer_PlaybackPaused;
+                        audioPlayer.PlaybackResumed += audioPlayer_PlaybackResumed;
+                        audioPlayer.PlaybackStopped += audioPlayer_PlaybackStopped;
+
+                        if (!IsPlaylistRunning)
+                            currentAudioFile = new AudioFileInfo(Path.GetFileName(mAudioFile), mAudioFile);
+
+                        Action action = () =>
+                            {
+                                if (tbVolume.Value != VOL_INIT * 100)
+                                    audioPlayer.SetVolume((float)tbVolume.Value / 100f);
+                                else
+                                    audioPlayer.SetVolume(VOL_INIT);
+                            };
+                        Invoke(action);
+
+                        StartPlaybackThread();
+                    }
+                    else
+                    {
+                        if (aTimer != null && !aTimer.Enabled)
+                        {
+                            aTimer.Enabled = true;
+                            aTimer.Start();
+                        }                        
+                        StartPlaybackThread();
+                        audioPlayer.PlaybackStopType = PlaybackStopTypes.PlaybackStoppedReachingEndOfFile;                        
+                    }
+                }
+                catch (Exception)
+                {
+                }
                 userStopped = false;
             }
         }
@@ -727,7 +807,7 @@ namespace GoStreamAudioGUI
             if (mAudioFile != null)
             {
                 StopPlayback();                
-                waitHandle.Set();
+                //waitHandle.Set();
                 if (audioPlayer != null)
                     audioPlayer.PlaybackStopType = PlaybackStopTypes.PlaybackStoppedByUser;
                 userStopped = true;
@@ -778,8 +858,7 @@ namespace GoStreamAudioGUI
         }
 
         private void bgPlayWorker_RunWorkerCompleted(object sender, RunWorkerCompletedEventArgs e)
-        {
-            isWaitingHandle = false;
+        {            
             if (e.Cancelled == true)
             {
                 MessageBox.Show("Canceled!");
@@ -791,7 +870,9 @@ namespace GoStreamAudioGUI
             else
             {
                 //Debug.WriteLine("BACKGROUND WORKER THREAD FINISHED.");
-                StopPlayback();
+
+                isWaitingHandle = false;
+                
                 if (IsPlaylistRunning)
                 {
                     if (!isSingleFilePlaying)
@@ -804,7 +885,7 @@ namespace GoStreamAudioGUI
                             {
                                 aPos = plWnd.LastFileIdx;
                                 plWnd.LastFileIdx = aPos;
-                                plWnd.HasUserSelTrack = false;
+                                //plWnd.HasUserSelTrack = false;
                             }
                             else
                             {
@@ -830,10 +911,12 @@ namespace GoStreamAudioGUI
 
                                 if (File.Exists(mAudioFile))
                                 {
-                                    InitPlayer();
+                                    InitPlayer(true);
+                                    plWnd.HasUserSelTrack = false;
                                     InitBgWorker();
                                     StartPlaybackThread();
                                     NextTrackStarted(this, e);
+                                    UpdateMarquee();
                                 }
                                 //else
                                 //    MessageBox.Show(string.Format("File {0} not found!", mAudioFile));
@@ -841,18 +924,28 @@ namespace GoStreamAudioGUI
                             }
                             else
                             {
+                                StopPlayback();
                                 plWnd.LastFileIdx = -1;
                                 IsPlaylistRunning = false;
-                            }
-                            EnableButtons(false);
+                                EnableButtons(false);
+                            }                            
                         }
                     }
                     else
                         isSingleFilePlaying = false;
                 }
                 else
-                {                   
-                    Action action = () => EnableButtons(false);
+                {
+                    //isWaitingHandle = true;
+                    StopPlayback();
+                    //StartPlaybackThread();
+                    Action action = () =>
+                    {
+                        if (isSingleFilePlaying)
+                            EnableButtons(false);
+                        else
+                            EnableButtons(true);
+                    };
                     Invoke(action);
                 }
                 ((BackgroundWorker)sender).Dispose();
@@ -960,6 +1053,10 @@ namespace GoStreamAudioGUI
                 {
                     if (isWaitingHandle)
                     {
+                        if (IsPlaylistRunning && plWnd.HasUserSelTrack)
+                        {
+                            plWnd.HasUserSelTrack = false;
+                        }
                         isWaitingHandle = false;
                         waitHandle.Set();
                     }
