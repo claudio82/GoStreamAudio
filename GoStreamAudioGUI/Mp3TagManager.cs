@@ -180,11 +180,17 @@ namespace GoStreamAudioGUI
                 file.Tag.Year = year;
                 file.Tag.Track = trackNum;
 
-                if (!Utils.IsFileLocked(new FileInfo(fileName)))
-                    file.Save();
-                else
-                    player.SaveMp3Tag(file);
-                                
+                try
+                {
+                    if (!Utils.IsFileLocked(new FileInfo(fileName)))
+                        file.Save();
+                    else
+                        player.SaveMp3Tag(file);
+                }
+                catch (UnauthorizedAccessException)
+                { }
+                catch (Exception)
+                { }                
                 prompt.Close();
                 prompt.Dispose();
             };

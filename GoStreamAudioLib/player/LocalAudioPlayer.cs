@@ -286,8 +286,15 @@ namespace GoStreamAudioLib
                     this.file.Close();
                     this.file.Dispose();
                     this.file = null;
-                    
-                    taglibFile.Save();
+
+                    try
+                    {
+                        taglibFile.Save();
+                    }
+                    catch (UnauthorizedAccessException)
+                    { }
+                    catch (Exception)
+                    { }
                     
                     this.file = new AudioFileReader(prevFile);                    
                     wavePlayer.Init(file);
