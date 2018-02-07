@@ -12,6 +12,8 @@ namespace GoStreamAudioLib
         private int readAheadLength;                    // number of bytes for ahead's reading buffer
         private int readAheadOffset;                    // reading offset in the ahead's buffer
 
+        #region Constructor
+        
         /// <summary>
         /// default constructor
         /// </summary>
@@ -22,6 +24,10 @@ namespace GoStreamAudioLib
             readAheadBuffer = new byte[4096];
         }
 
+        #endregion
+
+        #region Public Properties
+        
         /// <summary>
         /// check if the stream can be read
         /// </summary>
@@ -47,14 +53,6 @@ namespace GoStreamAudioLib
         }
 
         /// <summary>
-        /// flushes the stream (not supported)
-        /// </summary>
-        public override void Flush()
-        {
-            throw new InvalidOperationException();
-        }
-
-        /// <summary>
         /// the stream length
         /// </summary>
         public override long Length
@@ -76,6 +74,10 @@ namespace GoStreamAudioLib
                 throw new InvalidOperationException();
             }
         }
+
+        #endregion
+
+        #region Public Methods
 
         /// <summary>
         /// read some bytes into given buffer
@@ -100,7 +102,7 @@ namespace GoStreamAudioLib
                     bytesRead += toCopy;
                     readAheadOffset += toCopy;
                 }
-                else 
+                else
                 {
                     //ahead's buffer is full
                     readAheadOffset = 0;
@@ -115,6 +117,16 @@ namespace GoStreamAudioLib
             pos += bytesRead;
             return bytesRead;
         }
+
+
+        /// <summary>
+        /// flushes the stream (not supported)
+        /// </summary>
+        public override void Flush()
+        {
+            throw new InvalidOperationException();
+        }
+
 
         /// <summary>
         /// operation is not supported
@@ -146,5 +158,8 @@ namespace GoStreamAudioLib
         {
             throw new InvalidOperationException();
         }
+
+        #endregion
+
     }
 }

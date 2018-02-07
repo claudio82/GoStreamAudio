@@ -16,14 +16,11 @@ namespace GoStreamAudioGUI
     {
         private MainWndPlayer parent;
         private int lastFileIdx = 0;
-        //private int rClkFileSelIdx = 0;
-        
+
         private M3UFile _m3uFile;
         private bool hasUserSelTrack = false;
 
         private System.Resources.ResourceManager rm;
-        //private double totPlaylistTime = 0;
-        //public ICollection<IAudioFileInspector> Inspectors { get; private set; }
         
         ListView l = new ListView();
 
@@ -66,6 +63,8 @@ namespace GoStreamAudioGUI
 
         #endregion
 
+        #region Constructor
+
         public PlayListWnd(MainWndPlayer parent)
         {
             InitializeComponent();
@@ -78,7 +77,7 @@ namespace GoStreamAudioGUI
             this.ShowInTaskbar = false;
             this.parent = parent;
             this.parent.CurrentTrackCompleted += parent_CurrentTrackCompleted;
-            this.parent.NextTrackStarted += parent_NextTrackStarted;           
+            this.parent.NextTrackStarted += parent_NextTrackStarted;
 
             this.btnClear.Enabled = this.btnSave.Enabled = false;
 
@@ -106,7 +105,16 @@ namespace GoStreamAudioGUI
 
             hasUserSelTrack = false;
         }
-                        
+
+        #endregion
+
+        #region Public Methods
+
+        /// <summary>
+        /// get audio file information for an item in the playlist
+        /// </summary>
+        /// <param name="idx">the index of the item</param>
+        /// <returns></returns>
         public AudioFileInfo GetFileToPlay(int idx)
         {
             AudioFileInfo afInfo;
@@ -134,6 +142,10 @@ namespace GoStreamAudioGUI
             }
         }
 
+        /// <summary>
+        /// return the size of the playlist 
+        /// </summary>
+        /// <returns></returns>
         public int GetPlaylistSize()
         {
             return l.Items.Count;
@@ -165,15 +177,19 @@ namespace GoStreamAudioGUI
             }
         }
 
+        #endregion
+
+        #region Private Methods
+
         /// <summary>
         /// loads all available audio files inside the control
         /// </summary>
         private void LoadAudioFilesIntoPlWnd()
-        {            
+        {
             List<AudioFileInfo> filesList = new List<AudioFileInfo>();
             using (FolderBrowserDialog folderBrowserDialog1 = new FolderBrowserDialog())
             {
-                string folderPath = "";                                
+                string folderPath = "";
                 //folderBrowserDialog1 = new FolderBrowserDialog();
                 if (folderBrowserDialog1.ShowDialog() == DialogResult.OK)
                 {
@@ -237,9 +253,14 @@ namespace GoStreamAudioGUI
                     t.Start();
                 }
             }
-            
+
         }
 
+        /// <summary>
+        /// search for audio files in the specified path
+        /// </summary>
+        /// <param name="sDir"></param>
+        /// <returns></returns>
         private List<String> DirSearch(string sDir)
         {
             string[] allowExt = { ".mp3", ".m4a", ".wav", ".ogg", ".wma", ".flac" }; //, ".aiff", ".wma" };
@@ -268,6 +289,9 @@ namespace GoStreamAudioGUI
             return files;
         }
 
+        /// <summary>
+        /// updates buttons status
+        /// </summary>
         private void UpdateButtons()
         {
             Action action = () =>
@@ -296,32 +320,12 @@ namespace GoStreamAudioGUI
         }
 
         /// <summary>
-        /// print audio file information (form mp3 only)
-        /// </summary>
-        /// <param name="fileName"></param>
-        /// <returns></returns>
-        private string DescribeFile(string fileName)
-        {
-            /*
-            if (fileName != string.Empty && fileName.ToLowerInvariant().EndsWith(".mp3"))
-            {
-                Mp3FileInspector mp3FileInsp = (Mp3FileInspector)Inspectors.ElementAt(0);
-                if (mp3FileInsp != null)
-                {
-                    return mp3FileInsp.Describe(fileName);
-                }
-            }*/
-            return "";
-        }
-
-        /// <summary>
         /// load a playlist from a M3U file
         /// </summary>
         private void LoadPlaylistFromFile()
         {
             string lblAudioFileType = rm.GetString("plAudioFilterType");
-            using (var ofd = new OpenFileDialog 
-                { Filter = lblAudioFileType + " (*.m3u)|*.m3u", Title = rm.GetString("openPlDlgTitle") })
+            using (var ofd = new OpenFileDialog { Filter = lblAudioFileType + " (*.m3u)|*.m3u", Title = rm.GetString("openPlDlgTitle") })
             {
                 if (ofd.ShowDialog() == DialogResult.OK)
                 {
@@ -365,6 +369,9 @@ namespace GoStreamAudioGUI
             }
         }
 
+        /// <summary>
+        /// populates the playlist
+        /// </summary>
         private void PopulateEntries()
         {
             l.Items.Clear();
@@ -382,6 +389,11 @@ namespace GoStreamAudioGUI
 
         }
 
+        /// <summary>
+        /// adds a single item to the playlist
+        /// </summary>
+        /// <param name="entry"></param>
+        /// <param name="index"></param>
         private void UpdateEntryItem(M3UEntry entry, int index = -1)
         {
             if (index == -1)
@@ -406,8 +418,7 @@ namespace GoStreamAudioGUI
         private void SaveCurrentPlToFile()
         {
             string lblAudioFileType = rm.GetString("plAudioFilterType");
-            using (var sfd = new SaveFileDialog 
-                { Filter = lblAudioFileType + " (*.m3u)|*.m3u", Title = rm.GetString("savePlDlgTitle") })
+            using (var sfd = new SaveFileDialog { Filter = lblAudioFileType + " (*.m3u)|*.m3u", Title = rm.GetString("savePlDlgTitle") })
             {
                 sfd.InitialDirectory = "";
                 sfd.OverwritePrompt = true;
@@ -423,10 +434,10 @@ namespace GoStreamAudioGUI
                         {
                             /*AudioFileInfo afInfo = new AudioFileInfo(
                                 Path.GetFileName(lvItem.SubItems[2].Text), lvItem.SubItems[2].Text);
-                            afInfo.SetDuration();*/                            
+                            afInfo.SetDuration();*/
 
-                            M3UEntry _m3uEntry = new M3UEntry(TimeSpan.Zero, 
-                                lvItem.SubItems[0].Text, 
+                            M3UEntry _m3uEntry = new M3UEntry(TimeSpan.Zero,
+                                lvItem.SubItems[0].Text,
                                 new Uri(lvItem.SubItems[2].Text));
                             _m3uFile.Add(_m3uEntry);
                         }
@@ -441,7 +452,13 @@ namespace GoStreamAudioGUI
             }
         }
 
-        public bool StartPlaying(string fName, int plPos)
+        /// <summary>
+        /// submits the next file to play
+        /// </summary>
+        /// <param name="fName"></param>
+        /// <param name="plPos"></param>
+        /// <returns></returns>
+        private bool StartPlaying(string fName, int plPos)
         {
             bool canPlay = false;
             try
@@ -474,12 +491,17 @@ namespace GoStreamAudioGUI
             }
             catch (Exception)
             {
-                
+
                 throw;
             }
             return canPlay;
         }
 
+        /// <summary>
+        /// returns audio file information for a playlist item
+        /// </summary>
+        /// <param name="item"></param>
+        /// <returns></returns>
         private AudioFileInfo GetAudioFileInfo(ListViewItem item)
         {
             AudioFileInfo afInfo = null;
@@ -492,58 +514,13 @@ namespace GoStreamAudioGUI
             }
             catch (Exception)
             {
-                
+
                 throw;
             }
             return afInfo;
         }
 
-        void parent_CurrentTrackCompleted(object sender, EventArgs e)
-        {
-            if (l.Items.Count > 0 && lastFileIdx >= 0)
-            {
-                Action action = () =>
-                    {
-                        l.Items[lastFileIdx].ForeColor = l.Items[lastFileIdx].SubItems[1].ForeColor = Color.Black;
-                    };
-                Invoke(action);
-            }
-        }
-
-        void parent_NextTrackStarted(object sender, EventArgs e)
-        {
-            if (l.Items.Count > 0 && lastFileIdx >= 0)
-            {
-                Action action = () =>
-                    {
-                        ListViewItem item = l.Items[lastFileIdx];
-                        item.ForeColor = item.SubItems[1].ForeColor = Color.Blue;
-                        if (item.SubItems[1].Text == "")
-                        {
-                            item.SubItems[1].Text = Utils.FormatTimeSpan2(parent.AudioPlayer.GetTotalTime());
-                            l.Columns[1].AutoResize(ColumnHeaderAutoResizeStyle.ColumnContent);
-                        }
-                    };
-                Invoke(action);
-            }
-        }
-
-        //private void l_DrawSubItem(object sender, DrawListViewSubItemEventArgs e)
-        //{
-        //    // This is the default text alignment
-        //    TextFormatFlags flags = TextFormatFlags.Right;
-
-        //    e.DrawText(flags);
-        //}
-
-        //// Handle DrawColumnHeader event
-        //private void l_DrawColumnHeader(object sender, DrawListViewColumnHeaderEventArgs e)
-        //{
-        //    // Draw the column header normally
-        //    e.DrawDefault = true;
-        //    e.DrawBackground();
-        //    e.DrawText();
-        //}
+        #endregion
 
         #region Event Handlers
 
@@ -619,20 +596,7 @@ namespace GoStreamAudioGUI
                 }));
             }
         }
-        /*
-        void l_MouseClick(object sender, MouseEventArgs e)
-        {
-            if (e.Button == MouseButtons.Right)
-            {
-                if (l.FocusedItem.Bounds.Contains(e.Location) == true)
-                {
-                    ListViewHitTestInfo info = l.HitTest(e.X, e.Y);
-                    rClkFileSelIdx = info.Item.Index;
-                    contextMenuStrip1.Show(Cursor.Position);
-                }
-            }
-        }*/
-
+        
         private void btnLoad_Click(object sender, EventArgs e)
         {
             LoadPlaylistFromFile();
@@ -641,13 +605,6 @@ namespace GoStreamAudioGUI
         private void btnAdd_Click(object sender, EventArgs e)
         {
             LoadAudioFilesIntoPlWnd();
-            //Thread t = new Thread(delegate()
-            //    {
-            //        LoadAudioFilesIntoPlayList();
-            //    });
-            //t.SetApartmentState(ApartmentState.STA);
-            //t.Priority = ThreadPriority.Lowest;
-            //t.Start();
         }
 
         private void btnSave_Click(object sender, EventArgs e)
@@ -684,11 +641,35 @@ namespace GoStreamAudioGUI
             OnPlaylistCleared(e);
         }
 
-        //private void audioPropertiesToolStripMenuItem_Click(object sender, EventArgs e)
-        //{
-        //    if (l.Items[rClkFileSelIdx].Text.ToLowerInvariant().EndsWith(".mp3"))
-        //        MessageBox.Show(DescribeFile(l.Items[rClkFileSelIdx].Text));
-        //}
+        void parent_CurrentTrackCompleted(object sender, EventArgs e)
+        {
+            if (l.Items.Count > 0 && lastFileIdx >= 0)
+            {
+                Action action = () =>
+                {
+                    l.Items[lastFileIdx].ForeColor = l.Items[lastFileIdx].SubItems[1].ForeColor = Color.Black;
+                };
+                Invoke(action);
+            }
+        }
+
+        void parent_NextTrackStarted(object sender, EventArgs e)
+        {
+            if (l.Items.Count > 0 && lastFileIdx >= 0)
+            {
+                Action action = () =>
+                {
+                    ListViewItem item = l.Items[lastFileIdx];
+                    item.ForeColor = item.SubItems[1].ForeColor = Color.Blue;
+                    if (item.SubItems[1].Text == "")
+                    {
+                        item.SubItems[1].Text = Utils.FormatTimeSpan2(parent.AudioPlayer.GetTotalTime());
+                        l.Columns[1].AutoResize(ColumnHeaderAutoResizeStyle.ColumnContent);
+                    }
+                };
+                Invoke(action);
+            }
+        }
 
         #endregion
 

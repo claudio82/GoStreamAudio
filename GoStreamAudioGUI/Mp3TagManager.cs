@@ -28,6 +28,15 @@ namespace GoStreamAudioGUI
         static PictureBox picBox;
         static TagLib.File file;
 
+        #region Public Methods
+
+        /// <summary>
+        /// loads tag information from MP3 file
+        /// </summary>
+        /// <param name="caption"></param>
+        /// <param name="fileName"></param>
+        /// <param name="player"></param>
+        /// <returns></returns>
         public DialogResult LoadTagInfo(string caption, string fileName, LocalAudioPlayer player)
         {
             prompt = new Form();
@@ -38,7 +47,7 @@ namespace GoStreamAudioGUI
             prompt.MaximizeBox = false;
             prompt.FormBorderStyle = FormBorderStyle.FixedDialog;
             prompt.Text = caption;
-            
+
             try
             {
                 file = TagLib.File.Create(fileName);
@@ -47,22 +56,8 @@ namespace GoStreamAudioGUI
             {
                 Debug.WriteLine("UNSUPPORTED FILE: " + fileName);
             }
-            
-            /*
-            u = new UltraID3();
 
-            try
-            {
-                u.Read(fileName);
-            }
-            catch (Exception ex)
-            {
-                Debug.WriteLine(string.Format("Error reading tag info: {0}", ex.Message));
-            }
-
-            GenreInfoCollection genColl = u.GenreInfos;
-            */
-            Label lblTitle = new Label() { Left = 5, Top = 50, Text = "Title", Width = 50 }; // Text = text };            
+            Label lblTitle = new Label() { Left = 5, Top = 50, Text = "Title", Width = 50 };
             TextBox txtTitle = new TextBox() { Left = 70, Top = 50, Width = 300 };
             txtTitle.Text = (file.Tag.Title == null) ? "" : file.Tag.Title;
             Label lblArtist = new Label() { Left = 5, Top = 90, Text = "Artist", Width = 50 };
@@ -111,16 +106,16 @@ namespace GoStreamAudioGUI
             NumericUpDown nudYear = new NumericUpDown() { Left = 70, Top = 210, Width = 300 };
             nudYear.Minimum = 1900;
             nudYear.Maximum = 9999;
-            
+
             if (file.Tag.Year > 0)
                 nudYear.Text = file.Tag.Year.ToString();
-            
+
             Label lblTrackNum = new Label() { Left = 5, Top = 250, Text = "Track #", Width = 50 };
             NumericUpDown nudTrackNum = new NumericUpDown() { Left = 70, Top = 250, Width = 300 };
-            nudTrackNum.Minimum = 0;            
+            nudTrackNum.Minimum = 0;
             if (file.Tag.Track > 0)
                 nudTrackNum.Text = file.Tag.Track.ToString();
-            
+
             Label lblPict = new Label() { Left = 5, Top = 290, Text = "Picture", Width = 50 };
             picBox = new PictureBox() { Left = 70, Width = 128, Height = 128, Top = 290 };
             picBox.Name = "pictureBox";
@@ -132,8 +127,7 @@ namespace GoStreamAudioGUI
 
             if (file.Tag.Pictures != null)
             {
-                // display the embedded picture if exists
-                //ID3FrameCollection frCol = u.ID3v2Tag.Frames.GetFrames(ID3v2FrameTypes.ID3v23Picture);
+                // display the embedded picture if exists                
                 var pictures = file.Tag.Pictures;
                 if (pictures.Length > 0)
                 {
@@ -173,8 +167,8 @@ namespace GoStreamAudioGUI
                 {
                     uint.TryParse(nudTrackNum.Text, out trackNum);
                 }
-                file.Tag.Title = title;                
-                file.Tag.Performers = new string[] { artist };                
+                file.Tag.Title = title;
+                file.Tag.Performers = new string[] { artist };
                 file.Tag.Album = album;
                 file.Tag.Genres = new string[] { genre };
                 file.Tag.Year = year;
@@ -190,7 +184,7 @@ namespace GoStreamAudioGUI
                 catch (UnauthorizedAccessException)
                 { }
                 catch (Exception)
-                { }                
+                { }
                 prompt.Close();
                 prompt.Dispose();
             };
@@ -212,20 +206,55 @@ namespace GoStreamAudioGUI
             return prompt.ShowDialog();
         }
 
+        /// <summary>
+        /// performs clean up of resources 
+        /// </summary>
+        public void CleanUp()
+        {
+            if (cm != null)
+            {
+                foreach (MenuItem item in cm.MenuItems)
+                {
+                    if ((string)item.Text == CM_CHANGE)
+                        item.Click -= Addpicture_Click;
+                    if ((string)item.Text == CM_REMOVE)
+                        item.Click -= Removepicture_Click;
+                    if ((string)item.Text == CM_GETONLINE)
+                        item.Click -= GetpictureOnline_Click;
+                }
+            }
+            if (prompt != null)
+            {
+                prompt.Close();
+                prompt.Dispose();
+                prompt = null;
+            }
+            GC.Collect();
+        }
+
+        #endregion
+
+        #region Private Methods
+
+        /// <summary>
+        /// downloads a cover image from a remote service
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         private void GetpictureOnline_Click(object sender, EventArgs e)
         {
             if (txtArtist != null && txtAlbum != null)
             {
                 string album = txtAlbum.Text.Trim();
                 string artist = txtArtist.Text.Trim();
-                if (!string.IsNullOrEmpty(album) 
+                if (!string.IsNullOrEmpty(album)
                     && !string.IsNullOrEmpty(artist))
                 {
                     FindCover(new string[] { artist, album });
                 }
             }
         }
-        
+
         /// <summary>
         /// remove all the picture frames from the ID3 v2 tag
         /// </summary>
@@ -234,12 +263,12 @@ namespace GoStreamAudioGUI
         private static void Removepicture_Click(object sender, EventArgs e)
         {
             if (file.Tag.Pictures != null)
-            {                
+            {
                 var pictures = file.Tag.Pictures;
                 if (pictures.Length > 0)
                 {
                     file.Tag.Pictures = null;
-                    
+
                     // reset the picture to the default one
                     Control ctls = prompt.Controls["pictureBox"];
                     if (ctls != null)
@@ -270,6 +299,11 @@ namespace GoStreamAudioGUI
             }
         }
 
+        /// <summary>
+        /// adds a picture frame to the ID3 v2 tag
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         private static void Addpicture_Click(object sender, EventArgs e)
         {
             OpenFileDialog ofDialog = new OpenFileDialog();
@@ -325,29 +359,10 @@ namespace GoStreamAudioGUI
             }
         }
 
-        public void CleanUp()
-        {
-            if (cm != null)
-            {
-                foreach(MenuItem item in cm.MenuItems)
-                {
-                    if ((string)item.Text == CM_CHANGE)
-                        item.Click -= Addpicture_Click;
-                    if ((string)item.Text == CM_REMOVE)
-                        item.Click -= Removepicture_Click;
-                    if ((string)item.Text == CM_GETONLINE)
-                        item.Click -= GetpictureOnline_Click;
-                }
-            }
-            if (prompt != null)
-            {
-                prompt.Close();
-                prompt.Dispose();
-                prompt = null;
-            }
-            GC.Collect();
-        }
-
+        /// <summary>
+        /// uses a web service to retrieve album art
+        /// </summary>
+        /// <param name="info"></param>
         private void FindCover(string[] info)
         {
             string artist = info[0];
@@ -457,5 +472,8 @@ namespace GoStreamAudioGUI
                 }
             }
         }
+
+        #endregion
+
     }
 }

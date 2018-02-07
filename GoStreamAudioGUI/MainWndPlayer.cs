@@ -7,9 +7,6 @@ using System.Diagnostics;
 using System.Drawing;
 using System.IO;
 using System.Threading;
-//using System.Linq;
-//using System.Text;
-//using System.Threading.Tasks;
 using System.Timers;
 using System.Windows.Forms;
 
@@ -17,6 +14,9 @@ namespace GoStreamAudioGUI
 {
     public partial class MainWndPlayer : LocalizedForm
     {
+
+        #region Private Fields
+        
         private const float VOL_INIT = 0.5f;
 
         //private fields        
@@ -38,6 +38,8 @@ namespace GoStreamAudioGUI
         private int shuffleCnt = 0;
 
         private System.Resources.ResourceManager rm;
+
+        #endregion
         
         #region Public Properties
 
@@ -107,10 +109,13 @@ namespace GoStreamAudioGUI
 
         #endregion
 
+        #region Constructor
+
         /// <summary>
         /// Default constructor
         /// </summary>
-        public MainWndPlayer() : base()
+        public MainWndPlayer()
+            : base()
         {
             InitializeComponent();
 
@@ -128,8 +133,7 @@ namespace GoStreamAudioGUI
             btnRew.Enabled = btnFwd.Enabled = false;
             chkShuffle.Enabled = false;
             marqueeLbl.Visible = false;
-            //PopulateOutputDriverCombo();
-            
+
             aTimer = new System.Timers.Timer();
             aTimer.AutoReset = true;
             aTimer.Enabled = false;
@@ -156,51 +160,100 @@ namespace GoStreamAudioGUI
             BringToFront();
         }
 
-        void plWnd_PlaylistCleared(object sender, EventArgs e)
-        {
-            Action action = () =>
-            {
-                btnRew.Enabled = false;
-                btnFwd.Enabled = false;
-                //chkRepeat.Enabled = false;
-                chkShuffle.Enabled =false;
-                //marqueeLbl.Visible = false;
-                if (chkShuffle.Checked)
-                    chkShuffle.Checked = !chkShuffle.Checked;
-            };
-            Invoke(action);
-        }
+        #endregion
+        
+        #region Public Methods
 
-        void plWnd_PlaylistLoaded(object sender, EventArgs e)
+        /// <summary>
+        /// init the audio player
+        /// </summary>
+        public void InitPlayer(bool dispose = true, PlaybackStopTypes pbStopType = PlaybackStopTypes.PlaybackStoppedReachingEndOfFile)
         {
-            plWnd.LastFileIdx = -1;  //0
-            Action action = () =>
-                {
-                    bool btnState = false;
-                    if (plWnd.GetPlaylistSize() > 0)
-                        btnState = true;
-                    btnRew.Enabled = btnState;
-                    btnFwd.Enabled = btnState;
-                    //chkRepeat.Enabled = btnState;
-                    chkShuffle.Enabled = btnState;
-                    //marqueeLbl.Visible = btnState;
-                };
-            Invoke(action);
-            if (plWnd.GetPlaylistSize() > 0)
+            if (aTimer.Enabled)
             {
-                randSongsIdx = PlayListShuffler.ComputedRandomOrder(plWnd.PlayListItems);
-                shuffleCnt = 0;
-                //int cnt = 0;
-                //foreach (PlayListEntry sngIdx in randSongsIdx)
-                //{
-                //    ++cnt;
-                //    Debug.WriteLine(string.Format("-- {0}. {1} - {2} (has played = {3}", 
-                //        cnt, sngIdx.PosInPlayList, sngIdx.FileName, sngIdx.HasPlayedOnce));
-                //}
+                aTimer.Stop();
+                aTimer.Enabled = false;
+            }
+
+            Action action;
+            //action = () =>
+            //    {
+            try
+            {
+                if (audioPlayer != null)
+                {
+                    //waitHandle.Set();
+                    if (audioPlayer.IsPlaying() || audioPlayer.IsPaused())
+                    {
+                        audioPlayer.StopPlayback();
+                    }
+                    while (isWaitingHandle)
+                    {
+                    }
+                    audioPlayer.PlaybackResumed -= audioPlayer_PlaybackResumed;
+                    //audioPlayer.PlaybackStopped -= audioPlayer_PlaybackStopped;
+                    if (dispose)
+                    {
+                        audioPlayer.Dispose();
+                        audioPlayer = null;
+                    }
+
+                }
+            }
+            catch (Exception)
+            {
+                //throw;
+            }
+            //    };
+            //Invoke(action);
+            try
+            {
+                //if (audioPlayer == null)
+
+                audioPlayer =
+                        new LocalAudioPlayer(mAudioFile, GetSelectedOutputDriver());
+                audioPlayer.PlaybackStopType = pbStopType;
+                //audioPlayer.PlaybackPaused += audioPlayer_PlaybackPaused;
+                audioPlayer.PlaybackResumed += audioPlayer_PlaybackResumed;
+                //audioPlayer.PlaybackStopped += audioPlayer_PlaybackStopped;
+                if (!IsPlaylistRunning)
+                    currentAudioFile = new AudioFileInfo(Path.GetFileName(mAudioFile), mAudioFile);
+            }
+            catch (Exception)
+            {
+                action = () => MessageBox.Show(this, string.Format("Cannot load file '{0}'", mAudioFile));
+                Invoke(action);
+            }
+            if (audioPlayer != null)
+            {
+                action = () =>
+                {
+                    if (tbVolume.Value != VOL_INIT * 100)
+                        audioPlayer.SetVolume((float)tbVolume.Value / 100f);
+                    else
+                        audioPlayer.SetVolume(VOL_INIT);
+                };
+                tbVolume.Invoke(action);
+                action = () => lblTotalTime.Text = Utils.FormatTimeSpan(audioPlayer.GetTotalTime());
+                lblTotalTime.Invoke(action);
+                action = () =>
+                {
+                    tbAudioPos.Value = 0;
+                    tbAudioPos.Maximum = (int)(audioPlayer.GetTotalTime().Minutes) * 60
+                        + audioPlayer.GetTotalTime().Seconds;
+                    if (tbAudioPos.Maximum > 0)
+                        tbAudioPos.Enabled = true;
+                    else
+                        tbAudioPos.Enabled = false;
+                };
+                tbAudioPos.Invoke(action);
+                action = () =>
+                {
+                    UpdateMarquee();
+                };
+                Invoke(action);
             }
         }
-      
-        #region Private methods
 
         public void InitBgWorker()
         {
@@ -211,28 +264,24 @@ namespace GoStreamAudioGUI
                 bgPlayWorker.WorkerSupportsCancellation = true;
                 this.bgPlayWorker.DoWork += new System.ComponentModel.DoWorkEventHandler(this.bgPlayWorker_DoWork);
                 this.bgPlayWorker.RunWorkerCompleted += new System.ComponentModel.RunWorkerCompletedEventHandler(this.bgPlayWorker_RunWorkerCompleted);
-            }            
+            }
         }
 
         public void EnableButtons(bool playing)
         {
             Action action = () =>
-                {
-                    btnPlay.Enabled = !playing;
-                    btnPause.Enabled = playing;
-                    btnStop.Enabled = playing;
-                };
+            {
+                btnPlay.Enabled = !playing;
+                btnPause.Enabled = playing;
+                btnStop.Enabled = playing;
+            };
             Invoke(action);
         }
 
-        private void PopulateOutputDriverCombo()
-        {
-            comboBoxOutputDriver.Items.Add("WaveOut Window Callbacks");
-            comboBoxOutputDriver.Items.Add("WaveOut Function Callbacks");
-            comboBoxOutputDriver.Items.Add("WaveOut Event Callbacks");
-            comboBoxOutputDriver.SelectedIndex = 0;
-        }
+        #endregion
 
+        #region Private methods
+        
         /// <summary>
         /// opens a single audio file
         /// </summary>
@@ -286,111 +335,10 @@ namespace GoStreamAudioGUI
             }
         }
 
-        /// <summary>
-        /// init the audio player
-        /// </summary>
-        public void InitPlayer(bool dispose = true, PlaybackStopTypes pbStopType = PlaybackStopTypes.PlaybackStoppedReachingEndOfFile)
-        {            
-            if (aTimer.Enabled)
-            {
-                aTimer.Stop();
-                aTimer.Enabled = false;
-            }
+        //private void audioPlayer_PlaybackStopped()
+        //{
             
-            Action action;
-            //action = () =>
-            //    {
-            try
-            {
-                if (audioPlayer != null)
-                {
-                    //waitHandle.Set();
-                    if (audioPlayer.IsPlaying() || audioPlayer.IsPaused())
-                    {
-                        audioPlayer.StopPlayback();
-                    }
-                    while (isWaitingHandle)
-                    {
-                    }
-                    audioPlayer.PlaybackResumed -= audioPlayer_PlaybackResumed;
-                    audioPlayer.PlaybackStopped -= audioPlayer_PlaybackStopped;
-                    if (dispose)
-                    {
-                        audioPlayer.Dispose();
-                        audioPlayer = null;
-                    }
-
-                }
-            }
-            catch (Exception)
-            {
-                //throw;
-            }
-            //    };
-            //Invoke(action);
-            try
-            {
-                //if (audioPlayer == null)
-                
-                    audioPlayer =
-                            new LocalAudioPlayer(mAudioFile, GetSelectedOutputDriver());
-                    audioPlayer.PlaybackStopType = pbStopType;
-                    //audioPlayer.PlaybackPaused += audioPlayer_PlaybackPaused;
-                    audioPlayer.PlaybackResumed += audioPlayer_PlaybackResumed;
-                    audioPlayer.PlaybackStopped += audioPlayer_PlaybackStopped;
-                if (!IsPlaylistRunning)
-                    currentAudioFile = new AudioFileInfo(Path.GetFileName(mAudioFile), mAudioFile);
-            }
-            catch (Exception)
-            {
-                action = () => MessageBox.Show(this, string.Format("Cannot load file '{0}'", mAudioFile));
-                Invoke(action);
-            }
-            if (audioPlayer != null)
-            {
-                action = () =>
-                {
-                    if (tbVolume.Value != VOL_INIT * 100)
-                        audioPlayer.SetVolume((float)tbVolume.Value / 100f);
-                    else
-                        audioPlayer.SetVolume(VOL_INIT);
-                };
-                tbVolume.Invoke(action);
-                action = () => lblTotalTime.Text = Utils.FormatTimeSpan(audioPlayer.GetTotalTime());
-                lblTotalTime.Invoke(action);
-                action = () =>
-                {
-                    tbAudioPos.Value = 0;
-                    tbAudioPos.Maximum = (int)(audioPlayer.GetTotalTime().Minutes) * 60 
-                        + audioPlayer.GetTotalTime().Seconds;
-                    if (tbAudioPos.Maximum > 0)
-                        tbAudioPos.Enabled = true;
-                    else
-                        tbAudioPos.Enabled = false;
-                };
-                tbAudioPos.Invoke(action);
-                action = () =>
-                {
-                    //if (IsPlaylistRunning)
-                    {
-                        if (currentAudioFile != null)
-                        {
-                            marqueeLbl.Text = currentAudioFile.FileName;
-                            marqueeLbl.Width = this.MinimumSize.Width + currentAudioFile.FileName.Length + 5;
-                            marqueeLbl.Visible = true;
-                            marqueeLbl.FilePlayingFullPath = currentAudioFile.FullPath;
-                            marqueeLbl.AudioPlayer = this.audioPlayer;
-                        }
-                    }
-                };
-                Invoke(action);
-            }
-        }
-
-        private void audioPlayer_PlaybackStopped()
-        {
-            
-        }
+        //}
 
         private void audioPlayer_PlaybackResumed()
         {
@@ -570,6 +518,63 @@ namespace GoStreamAudioGUI
             }
         }
 
+        private void UpdateMarquee()
+        {
+            if (currentAudioFile != null)
+            {
+                Action action = () =>
+                {
+                    marqueeLbl.Invalidate();
+                    marqueeLbl.Text = currentAudioFile.FileName;
+                    marqueeLbl.Width = this.MinimumSize.Width + currentAudioFile.FileName.Length + 5;
+                    marqueeLbl.ResetPosition(this.Width - currentAudioFile.FileName.Length - 20);
+                    marqueeLbl.Visible = true;
+                    marqueeLbl.FilePlayingFullPath = currentAudioFile.FullPath;
+                    marqueeLbl.AudioPlayer = this.audioPlayer;
+                };
+                Invoke(action);
+            }
+        }
+
+        private bool ResetPlayList(object sender, EventArgs e, int plIdx)
+        {
+            bool canPlay = false;
+            if (plIdx >= 0)
+            {
+                plWnd.LastFileIdx = plIdx;
+                if (plWnd.GetNextFileFromPlayList())
+                {
+                    if (File.Exists(mAudioFile))
+                    {
+                        InitPlayer();
+                        StartPlaybackThread();
+                        NextTrackStarted(sender, e);
+                        canPlay = true;
+                    }
+                    else
+                    {
+                        MessageBox.Show(string.Format("File {0} not found", mAudioFile));
+                    }
+                }
+            }
+            return canPlay;
+        }
+
+        private void switchToLang()
+        {
+            if (langItaTsmItem.Checked == true)         //in italian
+            {
+                //create culture for italian
+                LocalizedForm.GlobalUICulture = new System.Globalization.CultureInfo("it-IT");
+            }
+            else  //in english
+            {
+                LocalizedForm.GlobalUICulture = new System.Globalization.CultureInfo("en-US");
+            }
+            this.Culture = LocalizedForm.GlobalUICulture;
+            plWnd.Culture = LocalizedForm.GlobalUICulture;
+        }
+
         private void CleanUp()
         {
             if (bgPlayWorker != null)
@@ -611,7 +616,146 @@ namespace GoStreamAudioGUI
         #endregion
 
         #region Event handlers
-        
+
+        private void bgPlayWorker_DoWork(object sender, DoWorkEventArgs e)
+        {
+            BackgroundWorker worker = sender as BackgroundWorker;
+
+            if (worker.CancellationPending == true)
+            {
+                e.Cancel = true;
+                //break;
+            }
+            else
+            {
+                // start playback
+                if (BeginPlayback())
+                {
+                    if (this.IsPlaylistRunning && plWnd.HasUserSelTrack)
+                        plWnd.HasUserSelTrack = false;
+
+                    aTimer.Enabled = true;
+                    aTimer.Start();
+
+                    isWaitingHandle = true;
+                    waitHandle.WaitOne();
+
+                    waitHandle.Reset();
+                }
+            }
+        }
+
+        private void bgPlayWorker_RunWorkerCompleted(object sender, RunWorkerCompletedEventArgs e)
+        {
+            if (e.Cancelled == true)
+            {
+                MessageBox.Show("Canceled!");
+            }
+            else if (e.Error != null)
+            {
+                MessageBox.Show("Error: " + e.Error.Message);
+            }
+            else
+            {
+                //Debug.WriteLine("BACKGROUND WORKER THREAD FINISHED.");
+
+                isWaitingHandle = false;
+
+                if (IsPlaylistRunning)
+                {
+                    if (!isSingleFilePlaying)
+                    {
+                        if (!userStopped)
+                        {
+                            int aPos = -1;
+
+                            if (plWnd.HasUserSelTrack)
+                            {
+                                aPos = plWnd.LastFileIdx;
+                                plWnd.LastFileIdx = aPos;
+                                //plWnd.HasUserSelTrack = false;
+                            }
+                            else
+                            {
+                                CurrentTrackCompleted(this, e);
+                                if (!mIsShuffleChecked)
+                                {
+                                    aPos = plWnd.LastFileIdx + 1;
+                                }
+                                else
+                                {
+                                    aPos = randSongsIdx[((shuffleCnt + 1)) % plWnd.GetPlaylistSize()].PosInPlayList;
+                                    ++shuffleCnt;
+                                    if (shuffleCnt == plWnd.GetPlaylistSize())
+                                        shuffleCnt = 0;
+                                }
+                                plWnd.LastFileIdx = aPos;
+                            }
+
+                            if (aPos < plWnd.GetPlaylistSize())
+                            {
+                                currentAudioFile = plWnd.GetFileToPlay(aPos);
+                                mAudioFile = currentAudioFile.FullPath;
+
+                                if (File.Exists(mAudioFile))
+                                {
+                                    try
+                                    {
+                                        InitPlayer(true);
+                                        plWnd.HasUserSelTrack = false;
+                                        InitBgWorker();
+                                        StartPlaybackThread();
+                                        NextTrackStarted(this, e);
+                                        UpdateMarquee();
+                                    }
+                                    catch (Exception)
+                                    {
+                                        //throw;
+                                    }
+                                }
+                                //else
+                                //    MessageBox.Show(string.Format("File {0} not found!", mAudioFile));
+                                //++plWnd.LastFileIdx;                            
+                            }
+                            else
+                            {
+                                try
+                                {
+                                    StopPlayback();
+                                }
+                                catch (Exception)
+                                {
+                                    //throw;
+                                }
+                                plWnd.LastFileIdx = -1;
+                                IsPlaylistRunning = false;
+                                EnableButtons(false);
+                            }
+                        }
+                    }
+                    else
+                        isSingleFilePlaying = false;
+                }
+                else
+                {
+                    //isWaitingHandle = true;
+                    StopPlayback();
+                    //StartPlaybackThread();
+                    Action action = () =>
+                    {
+                        if (isSingleFilePlaying)
+                            EnableButtons(false);
+                        else
+                            EnableButtons(true);
+                    };
+                    Invoke(action);
+                }
+                ((BackgroundWorker)sender).Dispose();
+                GC.Collect();
+                //MessageBox.Show("End of playback.");
+            }
+        }
+
         private void openTsmItem_Click(object sender, EventArgs e)
         {
             Thread t = new Thread(delegate()
@@ -657,30 +801,10 @@ namespace GoStreamAudioGUI
 
         private void aboutTsmItem_Click(object sender, EventArgs e)
         {
-            //Thread t = new Thread(delegate()
-            //    {
-            MessageBox.Show(null, "2018 - by C.G.", rm.GetString("aboutTsmItem.Text", LocalizedForm.GlobalUICulture), MessageBoxButtons.OK);
-            //    });
-            //t.Start();
-            
-        }
-
-        private void UpdateMarquee()
-        {
-            if (currentAudioFile != null)
+            Invoke((Action)(() =>
             {
-                Action action = () =>
-                {
-                    marqueeLbl.Invalidate();
-                    marqueeLbl.Text = currentAudioFile.FileName;
-                    marqueeLbl.Width = this.MinimumSize.Width + currentAudioFile.FileName.Length + 5;
-                    marqueeLbl.ResetPosition(this.Width - currentAudioFile.FileName.Length - 20);
-                    marqueeLbl.Visible = true;
-                    marqueeLbl.FilePlayingFullPath = currentAudioFile.FullPath;
-                    marqueeLbl.AudioPlayer = this.audioPlayer;
-                };
-                Invoke(action);
-            }
+                MessageBox.Show(this, "2018 - by C.G.", rm.GetString("aboutTsmItem.Text", LocalizedForm.GlobalUICulture), MessageBoxButtons.OK);
+            }));            
         }
 
         void plWnd_PlaylistItemDoubleClicked(object sender, EventArgs e)
@@ -759,7 +883,7 @@ namespace GoStreamAudioGUI
                         audioPlayer.PlaybackStopType = PlaybackStopTypes.PlaybackStoppedReachingEndOfFile;
                         //audioPlayer.PlaybackPaused += audioPlayer_PlaybackPaused;
                         audioPlayer.PlaybackResumed += audioPlayer_PlaybackResumed;
-                        audioPlayer.PlaybackStopped += audioPlayer_PlaybackStopped;
+                        //audioPlayer.PlaybackStopped += audioPlayer_PlaybackStopped;
 
                         if (!IsPlaylistRunning)
                             currentAudioFile = new AudioFileInfo(Path.GetFileName(mAudioFile), mAudioFile);
@@ -805,350 +929,6 @@ namespace GoStreamAudioGUI
                 btnPlay.Enabled = true;
                 btnPause.Enabled = false;
             }
-        }
-
-        #endregion
-
-        private void btnStop_Click(object sender, EventArgs e)
-        {
-            if (mAudioFile != null)
-            {
-                StopPlayback();                
-                //waitHandle.Set();
-                if (audioPlayer != null)
-                    audioPlayer.PlaybackStopType = PlaybackStopTypes.PlaybackStoppedByUser;
-                userStopped = true;
-                //if (IsPlaylistRunning)
-                //    plWnd.HasUserSelTrack = true;
-                EnableButtons(false);
-            }
-        }
-
-        private void bgPlayWorker_DoWork(object sender, DoWorkEventArgs e)
-        {            
-            BackgroundWorker worker = sender as BackgroundWorker;
-            
-            if (worker.CancellationPending == true)
-            {
-                e.Cancel = true;
-                //break;
-            }
-            else
-            {
-                // start playback
-                if (BeginPlayback())
-                {
-                    if (this.IsPlaylistRunning && plWnd.HasUserSelTrack)
-                        plWnd.HasUserSelTrack = false;
-                    //TimeSpan ts = TimeSpan.Zero;                    
-                    //Action action = () => lblNowTime.Text = "00:00";
-                    //Action updateTbPos;
-
-                    aTimer.Enabled = true;
-                    aTimer.Start();
-
-                    isWaitingHandle = true;
-                    waitHandle.WaitOne();
-
-                    //while(audioPlayer != null && (audioPlayer.IsPlaying() || audioPlayer.IsPaused()))
-                    //{                    
-                    //    Thread.Sleep(500);
-                    //}
-                    //if (aTimer != null)
-                    //{
-                    //    aTimer.Stop();
-                    //    aTimer.Enabled = false;
-                    //}
-                    waitHandle.Reset();
-                }
-            }
-        }
-
-        private void bgPlayWorker_RunWorkerCompleted(object sender, RunWorkerCompletedEventArgs e)
-        {            
-            if (e.Cancelled == true)
-            {
-                MessageBox.Show("Canceled!");
-            }
-            else if (e.Error != null)
-            {
-                MessageBox.Show("Error: " + e.Error.Message);
-            }
-            else
-            {
-                //Debug.WriteLine("BACKGROUND WORKER THREAD FINISHED.");
-
-                isWaitingHandle = false;
-                
-                if (IsPlaylistRunning)
-                {
-                    if (!isSingleFilePlaying)
-                    {
-                        if (!userStopped)
-                        {
-                            int aPos = -1;
-
-                            if (plWnd.HasUserSelTrack)
-                            {
-                                aPos = plWnd.LastFileIdx;
-                                plWnd.LastFileIdx = aPos;
-                                //plWnd.HasUserSelTrack = false;
-                            }
-                            else
-                            {
-                                CurrentTrackCompleted(this, e);
-                                if (!mIsShuffleChecked)
-                                {
-                                    aPos = plWnd.LastFileIdx + 1;
-                                }
-                                else
-                                {
-                                    aPos = randSongsIdx[((shuffleCnt + 1)) % plWnd.GetPlaylistSize()].PosInPlayList;
-                                    ++shuffleCnt;
-                                    if (shuffleCnt == plWnd.GetPlaylistSize())
-                                        shuffleCnt = 0;
-                                }
-                                plWnd.LastFileIdx = aPos;                                
-                            }
-
-                            if (aPos < plWnd.GetPlaylistSize())
-                            {
-                                currentAudioFile = plWnd.GetFileToPlay(aPos);
-                                mAudioFile = currentAudioFile.FullPath;
-
-                                if (File.Exists(mAudioFile))
-                                {
-                                    try
-                                    {
-                                        InitPlayer(true);
-                                        plWnd.HasUserSelTrack = false;
-                                        InitBgWorker();
-                                        StartPlaybackThread();
-                                        NextTrackStarted(this, e);
-                                        UpdateMarquee();
-                                    }
-                                    catch (Exception)
-                                    {                                       
-                                        //throw;
-                                    }
-                                }
-                                //else
-                                //    MessageBox.Show(string.Format("File {0} not found!", mAudioFile));
-                                //++plWnd.LastFileIdx;                            
-                            }
-                            else
-                            {
-                                try
-                                {
-                                    StopPlayback();
-                                }
-                                catch (Exception)
-                                {
-                                    //throw;
-                                }
-                                plWnd.LastFileIdx = -1;
-                                IsPlaylistRunning = false;
-                                EnableButtons(false);
-                            }                            
-                        }
-                    }
-                    else
-                        isSingleFilePlaying = false;
-                }
-                else
-                {
-                    //isWaitingHandle = true;
-                    StopPlayback();
-                    //StartPlaybackThread();
-                    Action action = () =>
-                    {
-                        if (isSingleFilePlaying)
-                            EnableButtons(false);
-                        else
-                            EnableButtons(true);
-                    };
-                    Invoke(action);
-                }
-                ((BackgroundWorker)sender).Dispose();
-                GC.Collect();
-                //MessageBox.Show("End of playback.");
-            }
-        }
-
-        private bool ResetPlayList(object sender, EventArgs e, int plIdx)
-        {
-            bool canPlay = false;
-            if (plIdx >= 0)
-            {
-                plWnd.LastFileIdx = plIdx;
-                if (plWnd.GetNextFileFromPlayList())
-                {
-                    if (File.Exists(mAudioFile))
-                    {
-                        InitPlayer();
-                        StartPlaybackThread();
-                        NextTrackStarted(sender, e);
-                        canPlay = true;
-                    }
-                    else
-                    {
-                        MessageBox.Show(string.Format("File {0} not found", mAudioFile));
-                    }
-                }
-            }
-            return canPlay;
-        }
-
-        #region Event Handlers
-
-        public event EventHandler CurrentTrackCompleted;        
-        protected virtual void OnCurrentTrackCompleted(EventArgs e)
-        {
-            var handler = CurrentTrackCompleted;
-            if (handler != null)
-                handler(this, e);
-        }
-
-        public event EventHandler NextTrackStarted;
-        protected virtual void OnNextTrackStarted(EventArgs e)
-        {
-            var handler = NextTrackStarted;
-            if (handler != null)
-                handler(this, e);
-        }
-
-        #endregion
-
-        private void tbVolume_ValueChanged(object sender, EventArgs e)
-        {
-            if (audioPlayer != null)
-            {
-                audioPlayer.SetVolume((float)tbVolume.Value / 100f);
-            }
-        }
-
-        private void tbAudioPos_ValueChanged(object sender, EventArgs e)
-        {            
-            userTbAudioUpdating = true;
-        }
-
-        private void tbAudioPos_MouseUp(object sender, MouseEventArgs e)
-        {
-            if (userTbAudioUpdating)
-            {
-                int newVal = tbAudioPos.Value;
-                userTbAudioUpdating = false;
-                
-                UpdateAudioPos(newVal);
-            }
-            mUpdateAudioPos = true;
-        }
-
-        private void tbAudioPos_MouseDown(object sender, MouseEventArgs e)
-        {
-            mUpdateAudioPos = false;
-        }
-
-        // Specify what you want to happen when the Elapsed event is raised.
-        private void OnTimedEvent(object source, ElapsedEventArgs e)
-        {
-            Action updateTbPos;
-            TimeSpan ts = audioPlayer.GetCurrentTime();
-            string ctimeStr = Utils.FormatTimeSpan(ts);
-            Action action = () => lblNowTime.Text = ctimeStr;
-            lblNowTime.Invoke(action);
-            if (mUpdateAudioPos)
-            {
-                updateTbPos = () =>
-                {
-                    tbAudioPos.Value = (int)ts.Minutes * 60 + ts.Seconds;
-                };
-
-                tbAudioPos.Invoke(updateTbPos);
-            }
-            action = () =>
-            {
-                if ( audioPlayer.IsStopped() && audioPlayer.PlaybackStopType == PlaybackStopTypes.PlaybackStoppedReachingEndOfFile
-                      /*Math.Abs(audioPlayer.GetTotalTime().TotalSeconds - ts.TotalSeconds) < 0.20d */
-                    )                
-                {
-                    if (isWaitingHandle)
-                    {
-                        if (IsPlaylistRunning && plWnd.HasUserSelTrack)
-                        {
-                            plWnd.HasUserSelTrack = false;
-                        }
-                        isWaitingHandle = false;
-                        waitHandle.Set();
-                    }
-                    if (aTimer != null)
-                    {
-                        aTimer.Stop();
-                        aTimer.Enabled = false;
-                    }
-                    tbAudioPos.Value = 0;
-                }
-            };
-            Invoke(action);
-        }
-
-        private void MainWndPlayer_Resize(object sender, EventArgs e)
-        {
-            if (WindowState == FormWindowState.Minimized)
-            {
-                if (plWnd.Visible)
-                    plWnd.Hide();
-            }
-            if (WindowState == FormWindowState.Maximized)
-            {
-                if (!plWnd.Visible)
-                    plWnd.Show(this);
-            }
-        }
-
-        private void langEngTsmItem_Click(object sender, EventArgs e)
-        {
-            if (langEngTsmItem.Checked == true)
-            {
-                langEngTsmItem.Checked = false;
-                langItaTsmItem.Checked = true;
-            }
-            else
-            {
-                langEngTsmItem.Checked = true;
-                langItaTsmItem.Checked = false;
-            }
-            switchToLang();
-        }
-
-        private void langItaTsmItem_Click(object sender, EventArgs e)
-        {
-            if (langItaTsmItem.Checked == true)      //in italian, switch to default language
-            {
-                langItaTsmItem.Checked = false;
-                langEngTsmItem.Checked = true;
-            }
-            else
-            {
-                langItaTsmItem.Checked = true;
-                langEngTsmItem.Checked = false;
-            }
-            switchToLang();
-        }
-
-        private void switchToLang()
-        {
-            if (langItaTsmItem.Checked == true)         //in italian
-            {
-                //create culture for italian
-                LocalizedForm.GlobalUICulture = new System.Globalization.CultureInfo("it-IT");
-            }
-            else  //in english
-            {
-                LocalizedForm.GlobalUICulture = new System.Globalization.CultureInfo("en-US");
-            }
-            this.Culture = LocalizedForm.GlobalUICulture;
-            plWnd.Culture = LocalizedForm.GlobalUICulture;
         }
 
         private void btnRew_Click(object sender, EventArgs e)
@@ -1327,9 +1107,208 @@ namespace GoStreamAudioGUI
             }
         }
 
+        private void btnStop_Click(object sender, EventArgs e)
+        {
+            if (mAudioFile != null)
+            {
+                StopPlayback();
+                //waitHandle.Set();
+                if (audioPlayer != null)
+                    audioPlayer.PlaybackStopType = PlaybackStopTypes.PlaybackStoppedByUser;
+                userStopped = true;
+                //if (IsPlaylistRunning)
+                //    plWnd.HasUserSelTrack = true;
+                EnableButtons(false);
+            }
+        }
+
+        private void tbVolume_ValueChanged(object sender, EventArgs e)
+        {
+            if (audioPlayer != null)
+            {
+                audioPlayer.SetVolume((float)tbVolume.Value / 100f);
+            }
+        }
+
+        private void tbAudioPos_ValueChanged(object sender, EventArgs e)
+        {
+            userTbAudioUpdating = true;
+        }
+
+        private void tbAudioPos_MouseUp(object sender, MouseEventArgs e)
+        {
+            if (userTbAudioUpdating)
+            {
+                int newVal = tbAudioPos.Value;
+                userTbAudioUpdating = false;
+
+                UpdateAudioPos(newVal);
+            }
+            mUpdateAudioPos = true;
+        }
+
+        private void tbAudioPos_MouseDown(object sender, MouseEventArgs e)
+        {
+            mUpdateAudioPos = false;
+        }
+
+        // Specify what you want to happen when the Elapsed event is raised.
+        private void OnTimedEvent(object source, ElapsedEventArgs e)
+        {
+            Action updateTbPos;
+            TimeSpan ts = audioPlayer.GetCurrentTime();
+            string ctimeStr = Utils.FormatTimeSpan(ts);
+            Action action = () => lblNowTime.Text = ctimeStr;
+            lblNowTime.Invoke(action);
+            if (mUpdateAudioPos)
+            {
+                updateTbPos = () =>
+                {
+                    tbAudioPos.Value = (int)ts.Minutes * 60 + ts.Seconds;
+                };
+
+                tbAudioPos.Invoke(updateTbPos);
+            }
+            action = () =>
+            {
+                if (audioPlayer.IsStopped() && audioPlayer.PlaybackStopType == PlaybackStopTypes.PlaybackStoppedReachingEndOfFile
+                    /*Math.Abs(audioPlayer.GetTotalTime().TotalSeconds - ts.TotalSeconds) < 0.20d */
+                    )
+                {
+                    if (isWaitingHandle)
+                    {
+                        if (IsPlaylistRunning && plWnd.HasUserSelTrack)
+                        {
+                            plWnd.HasUserSelTrack = false;
+                        }
+                        isWaitingHandle = false;
+                        waitHandle.Set();
+                    }
+                    if (aTimer != null)
+                    {
+                        aTimer.Stop();
+                        aTimer.Enabled = false;
+                    }
+                    tbAudioPos.Value = 0;
+                }
+            };
+            Invoke(action);
+        }
+
+        private void MainWndPlayer_Resize(object sender, EventArgs e)
+        {
+            if (WindowState == FormWindowState.Minimized)
+            {
+                if (plWnd.Visible)
+                    plWnd.Hide();
+            }
+            if (WindowState == FormWindowState.Maximized)
+            {
+                if (!plWnd.Visible)
+                    plWnd.Show(this);
+            }
+        }
+
+        private void langEngTsmItem_Click(object sender, EventArgs e)
+        {
+            if (langEngTsmItem.Checked == true)
+            {
+                langEngTsmItem.Checked = false;
+                langItaTsmItem.Checked = true;
+            }
+            else
+            {
+                langEngTsmItem.Checked = true;
+                langItaTsmItem.Checked = false;
+            }
+            switchToLang();
+        }
+
+        private void langItaTsmItem_Click(object sender, EventArgs e)
+        {
+            if (langItaTsmItem.Checked == true)      //in italian, switch to default language
+            {
+                langItaTsmItem.Checked = false;
+                langEngTsmItem.Checked = true;
+            }
+            else
+            {
+                langItaTsmItem.Checked = true;
+                langEngTsmItem.Checked = false;
+            }
+            switchToLang();
+        }
+
         private void chkShuffle_CheckedChanged(object sender, EventArgs e)
         {
             mIsShuffleChecked = chkShuffle.Checked;
-        }       
+        }
+
+        void plWnd_PlaylistCleared(object sender, EventArgs e)
+        {
+            Action action = () =>
+            {
+                btnRew.Enabled = false;
+                btnFwd.Enabled = false;
+                //chkRepeat.Enabled = false;
+                chkShuffle.Enabled = false;
+                //marqueeLbl.Visible = false;
+                if (chkShuffle.Checked)
+                    chkShuffle.Checked = !chkShuffle.Checked;
+            };
+            Invoke(action);
+        }
+
+        void plWnd_PlaylistLoaded(object sender, EventArgs e)
+        {
+            plWnd.LastFileIdx = -1;  //0
+            Action action = () =>
+            {
+                bool btnState = false;
+                if (plWnd.GetPlaylistSize() > 0)
+                    btnState = true;
+                btnRew.Enabled = btnState;
+                btnFwd.Enabled = btnState;
+                //chkRepeat.Enabled = btnState;
+                chkShuffle.Enabled = btnState;
+                //marqueeLbl.Visible = btnState;
+            };
+            Invoke(action);
+            if (plWnd.GetPlaylistSize() > 0)
+            {
+                randSongsIdx = PlayListShuffler.ComputedRandomOrder(plWnd.PlayListItems);
+                shuffleCnt = 0;
+                //int cnt = 0;
+                //foreach (PlayListEntry sngIdx in randSongsIdx)
+                //{
+                //    ++cnt;
+                //    Debug.WriteLine(string.Format("-- {0}. {1} - {2} (has played = {3}", 
+                //        cnt, sngIdx.PosInPlayList, sngIdx.FileName, sngIdx.HasPlayedOnce));
+                //}
+            }
+        }
+
+        #endregion
+                
+        #region External Event Handlers
+
+        public event EventHandler CurrentTrackCompleted;        
+        protected virtual void OnCurrentTrackCompleted(EventArgs e)
+        {
+            var handler = CurrentTrackCompleted;
+            if (handler != null)
+                handler(this, e);
+        }
+
+        public event EventHandler NextTrackStarted;
+        protected virtual void OnNextTrackStarted(EventArgs e)
+        {
+            var handler = NextTrackStarted;
+            if (handler != null)
+                handler(this, e);
+        }
+
+        #endregion
+        
     }
 }

@@ -5,7 +5,9 @@ using System.Text;
 namespace GoStreamAudioLib
 {
     public class Mp3FileInspector : IAudioFileInspector
-    {        
+    {
+        #region Public Properties
+        
         public string FileExtension
         {
             get { return ".mp3"; }
@@ -15,6 +17,10 @@ namespace GoStreamAudioLib
         {
             get { return "MP3 File"; }
         }
+
+        #endregion
+
+        #region Public Methods
 
         /// <summary>
         /// returns the MP3 file duration
@@ -61,5 +67,7 @@ namespace GoStreamAudioLib
             }
             return stringBuilder.ToString();
         }
+
+        #endregion
     }
 }

@@ -8,7 +8,6 @@ namespace GoStreamAudioLib
     {
         private string fileName = "";
         private string fullPath = "";
-        //private TimeSpan fileLength;
 
         #region Public Properties
 
@@ -38,31 +37,15 @@ namespace GoStreamAudioLib
 
         #endregion
 
+        #region Constructor
+        
         public AudioFileInfo(string fName, string fPath)
         {
             fileName = fName;
             fullPath = fPath;
         }
 
-        //#region Public Methods
+        #endregion
 
-        //public void SetDuration()
-        //{
-        //    if (fullPath != string.Empty && File.Exists(fullPath))
-        //    {
-        //        try
-        //        {
-        //            fileLength = new AudioFileReader(fullPath).TotalTime;
-        //        }
-        //        catch (Exception)
-        //        {
-        //            fileLength = TimeSpan.Zero;
-        //        }
-        //    }
-        //    else
-        //        fileLength = TimeSpan.Zero;
-        //}
-
-        //#endregion
     }
 }

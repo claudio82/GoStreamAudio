@@ -53,6 +53,8 @@ namespace GoStreamAudioGUI
 
         #endregion
 
+        #region Constructor
+        
         public MarqueeLabel()
         {
             this.DoubleClick += new System.EventHandler(this.MarqueeLabel_DoubleClick);
@@ -71,11 +73,23 @@ namespace GoStreamAudioGUI
             };
         }
 
+        #endregion
+
+        #region Public Methods
+        
+        /// <summary>
+        /// resets horizontal scrolling position
+        /// </summary>
+        /// <param name="w"></param>
         public void ResetPosition(int w)
         {
             offset = w;
         }
 
+        #endregion
+
+        #region Protected Methods
+        
         protected override void OnPaint(PaintEventArgs e)
         {
             base.OnPaint(e);
@@ -84,6 +98,21 @@ namespace GoStreamAudioGUI
             e.Graphics.DrawString(this.Text, this.Font, textBrush,
                                   this.ClientSize.Width + offset, yOffset);
         }
+
+        protected override void Dispose(bool disposing)
+        {
+            if (MarqueeTimer != null)
+            {
+                MarqueeTimer.Dispose();
+                MarqueeTimer = null;
+            }
+            this.DoubleClick -= this.MarqueeLabel_DoubleClick;
+            base.Dispose(disposing);
+        }
+
+        #endregion
+
+        #region Private Methods
 
         private void InitializeComponent()
         {
@@ -96,8 +125,8 @@ namespace GoStreamAudioGUI
 
         private void MarqueeLabel_DoubleClick(object sender, EventArgs e)
         {
-            if (this.filePlayingFullPath != null 
-                && this.filePlayingFullPath != "" 
+            if (this.filePlayingFullPath != null
+                && this.filePlayingFullPath != ""
                 && this.filePlayingFullPath.ToLowerInvariant().EndsWith(".mp3"))
             {
                 try
@@ -116,14 +145,6 @@ namespace GoStreamAudioGUI
                         tagMan.Close();
                         tagMan.Dispose();
                     }
-
-                    //Mp3TagManager.ShowDialog("Edit Mp3 Tag", this.filePlayingFullPath, this.audioPlayer);
-
-                    //UltraID3 u = new UltraID3();
-                    //u.Read(this.filePlayingFullPath);
-
-                    //Action action = () => MessageBox.Show(u.Artist + " - " + u.Title);
-                    //Invoke(action);
                 }
                 catch (Exception ex)
                 {
@@ -132,15 +153,7 @@ namespace GoStreamAudioGUI
             }
         }
 
-        protected override void Dispose(bool disposing)
-        {
-            if (MarqueeTimer != null)
-            {
-                MarqueeTimer.Dispose();
-                MarqueeTimer = null;
-            }
-            this.DoubleClick -= this.MarqueeLabel_DoubleClick;
-            base.Dispose(disposing);
-        }
+        #endregion
+
     }
 }

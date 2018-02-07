@@ -24,8 +24,9 @@ namespace GoStreamAudioLib
         private IWavePlayer waveOut;
         // the current streaming playback state
         private StreamingPlaybackState playbackState;
+        
+        #region Public Properties
 
-        // public properties
         public string AudioUrl
         {
             get
@@ -50,12 +51,33 @@ namespace GoStreamAudioLib
             }
         }
 
+        /// <summary>
+        /// checks if audio buffer is almost full
+        /// </summary>
+        public bool IsBufferNearlyFull
+        {
+            get
+            {
+                return bufferedWaveProvider != null &&
+                       bufferedWaveProvider.BufferLength - bufferedWaveProvider.BufferedBytes
+                       < bufferedWaveProvider.WaveFormat.AverageBytesPerSecond / 4;
+            }
+        }
+
+        #endregion
+
+        #region Constructor
+        
         public Mp3StreamAudioPlayer(string url)
         {
             this.audioUrl = url;
-            playbackState = StreamingPlaybackState.Stopped;            
+            playbackState = StreamingPlaybackState.Stopped;
         }
 
+        #endregion
+
+        #region Public Methods
+        
         /// <summary>
         /// stream a mp3 audio
         /// </summary>
@@ -194,7 +216,7 @@ namespace GoStreamAudioLib
         {
             playbackState = StreamingPlaybackState.Buffering;
             waveOut.Stop();
-            Debug.WriteLine(String.Format("Paused to buffer, waveOut.PlaybackState={0}", waveOut.PlaybackState));          
+            Debug.WriteLine(String.Format("Paused to buffer, waveOut.PlaybackState={0}", waveOut.PlaybackState));
         }
 
         /// <summary>
@@ -224,19 +246,6 @@ namespace GoStreamAudioLib
         }
 
         /// <summary>
-        /// checks if audio buffer is almost full
-        /// </summary>
-        public bool IsBufferNearlyFull
-        {
-            get
-            {
-                return bufferedWaveProvider != null &&
-                       bufferedWaveProvider.BufferLength - bufferedWaveProvider.BufferedBytes
-                       < bufferedWaveProvider.WaveFormat.AverageBytesPerSecond / 4;
-            }
-        }
-
-        /// <summary>
         /// returns a mp3 frame decompressor using audio format from mp3 frame
         /// </summary>
         /// <param name="frame">the mp3 frame</param>
@@ -248,17 +257,16 @@ namespace GoStreamAudioLib
             return new AcmMp3FrameDecompressor(waveFormat);
         }
 
-        private IWavePlayer CreateWaveOut()
-        {
-            return new WaveOut();
-        }
-
+        /// <summary>
+        /// initializes the audio streaming
+        /// </summary>
+        /// <returns></returns>
         public bool FlowAudio()
         {
             if (waveOut == null && bufferedWaveProvider != null)
             {
                 Debug.WriteLine("Creating WaveOut Device");
-                waveOut = CreateWaveOut(); 
+                waveOut = CreateWaveOut();
                 /*
                 waveOut.PlaybackStopped += OnPlaybackStopped;
                  */
@@ -272,7 +280,7 @@ namespace GoStreamAudioLib
             }
             else if (bufferedWaveProvider != null)
             {
-                
+
                 var bufferedSeconds = bufferedWaveProvider.BufferedDuration.TotalSeconds;
                 //ShowBufferState(bufferedSeconds);
                 // make it stutter less if we buffer up a decent amount before playing
@@ -281,7 +289,7 @@ namespace GoStreamAudioLib
                     Pause();
                     return false;
                 }
-                else if ((bufferedSeconds >= 0.5 && playbackState == StreamingPlaybackState.Buffering) 
+                else if ((bufferedSeconds >= 0.5 && playbackState == StreamingPlaybackState.Buffering)
                     || (bufferedSeconds > 3 && playbackState == StreamingPlaybackState.Buffering)
                     || (bufferedSeconds > 0 && playbackState == StreamingPlaybackState.Buffering))
                 {
@@ -293,10 +301,22 @@ namespace GoStreamAudioLib
                     Debug.WriteLine("Reached end of stream");
                     StopPlayback();
                     return true;
-                }                
+                }
                 return false;
             }
             return false;
         }
+
+        #endregion
+
+        #region Private Methods
+        
+        private IWavePlayer CreateWaveOut()
+        {
+            return new WaveOut();
+        }
+
+        #endregion
+
     }
 }

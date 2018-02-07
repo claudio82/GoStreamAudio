@@ -8,7 +8,10 @@ namespace GoStreamAudioGUI
         private string mFileName;
         private bool hasPlayedOnce;
 
-        public int PosInPlayList {
+        #region Public Properties
+        
+        public int PosInPlayList
+        {
             get
             {
                 return mPosInPlayList;
@@ -18,8 +21,9 @@ namespace GoStreamAudioGUI
                 mPosInPlayList = value;
             }
         }
-        public string FileName 
-        { 
+
+        public string FileName
+        {
             get
             {
                 return mFileName;
@@ -29,7 +33,8 @@ namespace GoStreamAudioGUI
                 mFileName = value;
             }
         }
-        public bool HasPlayedOnce 
+
+        public bool HasPlayedOnce
         {
             get
             {
@@ -41,6 +46,7 @@ namespace GoStreamAudioGUI
             }
         }
 
+        #endregion
 
     }
 }

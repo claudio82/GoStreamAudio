@@ -14,6 +14,8 @@ namespace GoStreamAudioLib
             get { return _entries[index]; }
         }
 
+        #region Public Methods
+
         public void Load(string fileName, bool resolveRelativePaths = false)
         {
             _entries.Clear();
@@ -96,6 +98,18 @@ namespace GoStreamAudioLib
             }
         }
 
+        public M3UEntry Find(Predicate<M3UEntry> match)
+        {
+            return _entries.Find(match);
+        }
+
+        public List<M3UEntry> FindAll(Predicate<M3UEntry> match)
+        {
+            return _entries.FindAll(match);
+        }
+
+        #endregion
+
         #region Implementation of IEnumerable
 
         public IEnumerator<M3UEntry> GetEnumerator()
@@ -149,14 +163,5 @@ namespace GoStreamAudioLib
 
         #endregion
 
-        public M3UEntry Find(Predicate<M3UEntry> match)
-        {
-            return _entries.Find(match);
-        }
-
-        public List<M3UEntry> FindAll(Predicate<M3UEntry> match)
-        {
-            return _entries.FindAll(match);
-        }
     }
 }

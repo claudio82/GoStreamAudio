@@ -17,15 +17,6 @@ namespace GoStreamAudioLib
     {
         PlaybackStoppedByUser, PlaybackStoppedReachingEndOfFile
     }
-    
-    /*
-    public enum AudioReaderType
-    {
-        AudioFileReader = 0,
-        VorbisFileReader = 1,
-        FlacFileReader = 2,
-        Unknown = 3
-    }*/
 
     public class LocalAudioPlayer : IAudioPlayer, IDisposable
     {
@@ -36,20 +27,7 @@ namespace GoStreamAudioLib
         private FlacReader flacReader;
         public PlaybackStopTypes PlaybackStopType { get; set; }
 
-        //#region Public Properties
-
-        ///// <summary>
-        ///// the wave player instance
-        ///// </summary>
-        //public IWavePlayer WavePlayer
-        //{
-        //    get
-        //    {
-        //        return wavePlayer;
-        //    }
-        //}
-
-        //#endregion
+        #region Constructor
 
         /// <summary>
         /// Initialize a local audio player with given type
@@ -60,14 +38,14 @@ namespace GoStreamAudioLib
         {
             PlaybackStopType = PlaybackStopTypes.PlaybackStoppedReachingEndOfFile;
             Debug.Assert(this.wavePlayer == null);
-            this.wavePlayer = CreateWavePlayer(waveOutType); /*new DirectSoundOut(200);*/
+            this.wavePlayer = CreateWavePlayer(waveOutType);
             wavePlayer.PlaybackStopped += wavePlayer_PlaybackStopped;
             try
             {
-                
+
                 if (fileName.ToLowerInvariant().EndsWith(".ogg"))
                 {
-                    vorbisReader = new VorbisWaveReader(fileName);                    
+                    vorbisReader = new VorbisWaveReader(fileName);
                     wavePlayer.Init(vorbisReader);
                 }
                 else if (fileName.ToLowerInvariant().EndsWith(".flac"))
@@ -78,34 +56,23 @@ namespace GoStreamAudioLib
                 else
                 {
                     this.file = new AudioFileReader(fileName);
-                    this.wavePlayer.Init(file);                    
+                    this.wavePlayer.Init(file);
                 }
-                
+
                 //this.wavePlayer.PlaybackStopped += wavePlayer_PlaybackStopped;
             }
             catch (Exception)
-            {                
+            {
                 //throw;
             }
-            
+
             //Play();
         }
 
-        void wavePlayer_PlaybackStopped(object sender, StoppedEventArgs e)
-        {
-            //Dispose();
-            if (PlaybackStopped != null)
-            {
-                PlaybackStopped();
-            }
-        }
-        
-        //private void wavePlayer_PlaybackStopped(object sender, StoppedEventArgs e)
-        //{
-        //    //file.Position = 0;
-        //    //sCleanUp();
-        //}
-        
+        #endregion
+
+        #region Public Methods
+
         /// <summary>
         /// unsupported operation
         /// </summary>
@@ -115,7 +82,7 @@ namespace GoStreamAudioLib
         }
 
         /// <summary>
-        /// play audio file
+        /// play an audio file
         /// </summary>
         public void Play()
         {
@@ -134,12 +101,12 @@ namespace GoStreamAudioLib
                     PlaybackResumed();
                 }
             }
-            
+
             //throw new NotImplementedException();
         }
 
         /// <summary>
-        /// pause audio file
+        /// pause an audio file
         /// </summary>
         public void Pause()
         {
@@ -162,7 +129,7 @@ namespace GoStreamAudioLib
                 }
                 if (vorbisReader != null) vorbisReader.Position = 0L;
                 if (flacReader != null) flacReader.Position = 0L;
-                              
+
             }
         }
 
@@ -200,6 +167,10 @@ namespace GoStreamAudioLib
                 return false;
         }
 
+        /// <summary>
+        /// returns true if player state is PlaybackState.Stopped
+        /// </summary>
+        /// <returns></returns>
         public bool IsStopped()
         {
             if (wavePlayer != null)
@@ -243,6 +214,10 @@ namespace GoStreamAudioLib
             return TimeSpan.Zero;
         }
 
+        /// <summary>
+        /// sets the volume of audio file (works only for Media Foundation file types)
+        /// </summary>
+        /// <param name="val"></param>
         public void SetVolume(float val)
         {
             if (file != null)
@@ -251,6 +226,10 @@ namespace GoStreamAudioLib
             //    wavePlayer.Volume = val;
         }
 
+        /// <summary>
+        /// sets the current time position of audio file
+        /// </summary>
+        /// <param name="ts"></param>
         public void SetCurrentTime(TimeSpan ts)
         {
             if (file != null && ts.CompareTo(file.TotalTime) < 0)
@@ -267,6 +246,10 @@ namespace GoStreamAudioLib
             }
         }
 
+        /// <summary>
+        /// saves mp3 tag information to file
+        /// </summary>
+        /// <param name="taglibFile"></param>
         public void SaveMp3Tag(TagLib.File taglibFile)
         {
             if (taglibFile != null)
@@ -282,7 +265,7 @@ namespace GoStreamAudioLib
                     //file.Dispose();
 
                     string prevFile = this.file.FileName;
-                    
+
                     this.file.Close();
                     this.file.Dispose();
                     this.file = null;
@@ -295,32 +278,62 @@ namespace GoStreamAudioLib
                     { }
                     catch (Exception)
                     { }
-                    
-                    this.file = new AudioFileReader(prevFile);                    
+
+                    this.file = new AudioFileReader(prevFile);
                     wavePlayer.Init(file);
-                    SetVolume(curVol);                    
+                    SetVolume(curVol);
                     //wavePlayer.Play();
                 }
             }
         }
 
-        //public AudioReaderType GetReaderType()
-        //{
-        //    if (file != null)
-        //        return AudioReaderType.AudioFileReader;
-        //    else if (vorbisReader != null)
-        //        return AudioReaderType.VorbisFileReader;
-        //    else if (flacReader != null)
-        //        return AudioReaderType.FlacFileReader;
-        //    else
-        //        return AudioReaderType.Unknown;
-        //}
+        /// <summary>
+        /// releases all the player related resources
+        /// </summary>
+        public void Dispose()
+        {
+            if (this.file != null)
+            {
+                this.file.Close();
+                this.file.Dispose();
+                this.file = null;
+            }
+            if (vorbisReader != null)
+            {
+                this.vorbisReader.Close();
+                this.vorbisReader.Dispose();
+                this.vorbisReader = null;
+            }
+            if (flacReader != null)
+            {
+                this.flacReader.Close();
+                this.flacReader.Dispose();
+                this.flacReader = null;
+            }
+            if (this.wavePlayer != null)
+            {
+                this.wavePlayer.PlaybackStopped -= wavePlayer_PlaybackStopped;
+                this.wavePlayer.Dispose();
+                this.wavePlayer = null;
+            }
+        }
 
-        #region Public Events
+        #endregion
+
+        #region Public and private events
 
         public event Action PlaybackResumed;
         //public event Action PlaybackPaused;
         public event Action PlaybackStopped;
+
+        void wavePlayer_PlaybackStopped(object sender, StoppedEventArgs e)
+        {
+            //Dispose();
+            if (PlaybackStopped != null)
+            {
+                PlaybackStopped();
+            }
+        }
 
         #endregion
 
@@ -344,47 +357,6 @@ namespace GoStreamAudioLib
             }
         }
         #endregion
-
-        //public void CloseFile()
-        //{
-        //    if (this.wavePlayer != null)
-        //    {
-        //        this.wavePlayer.Stop();
-        //    }
-        //    if (this.file != null)
-        //    {
-        //        this.file.Close();
-        //        this.file.Dispose();
-        //        this.file = null;
-        //    }
-        //}
-
-        public void Dispose()
-        {
-            if (this.file != null)
-            {
-                this.file.Close();
-                this.file.Dispose();
-                this.file = null;
-            }
-            if (vorbisReader != null)
-            {
-                this.vorbisReader.Close();
-                this.vorbisReader.Dispose();
-                this.vorbisReader = null;
-            }
-            if (flacReader != null)
-            {
-                this.flacReader.Close();
-                this.flacReader.Dispose();
-                this.flacReader = null;
-            }
-            if (this.wavePlayer != null)
-            {
-                //this.wavePlayer.PlaybackStopped -= wavePlayer_PlaybackStopped;
-                this.wavePlayer.Dispose();
-                this.wavePlayer = null;
-            }     
-        }
+        
     }
 }

@@ -6,6 +6,9 @@ namespace GoStreamAudioGUI
 {
     public static class Utils
     {
+
+        #region Public Methods
+
         public static string FormatTimeSpan(TimeSpan ts)
         {
             return string.Format("{0:D2}:{1:D2}", (int)ts.TotalMinutes, ts.Seconds);
@@ -41,5 +44,7 @@ namespace GoStreamAudioGUI
             //file is not locked
             return false;
         }
+
+        #endregion
     }
 }

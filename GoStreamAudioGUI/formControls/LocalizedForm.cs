@@ -43,11 +43,52 @@ namespace GoStreamAudioGUI
             }
         }
 
+        #region Constructor
+        
         public LocalizedForm()
         {
             this.resManager = new ComponentResourceManager(this.GetType());
             this.culture = CultureInfo.CurrentUICulture;
         }
+
+        #endregion
+
+        #region Public Methods
+        
+        /// <summary>
+        /// gets or sets the global UI culture
+        /// </summary>
+        public static CultureInfo GlobalUICulture
+        {
+            get { return Thread.CurrentThread.CurrentUICulture; }
+            set
+            {
+                if (GlobalUICulture.Equals(value) == false)
+                {
+                    foreach (var form in Application.OpenForms.OfType<LocalizedForm>())
+                    {
+                        form.Culture = value;
+                    }
+
+                    Thread.CurrentThread.CurrentUICulture = value;
+                }
+            }
+        }
+
+        #endregion
+
+        #region Protected Methods
+        
+        protected void OnCultureChanged()
+        {
+            var temp = this.CultureChanged;
+            if (temp != null)
+                temp(this, EventArgs.Empty);
+        }
+
+        #endregion
+
+        #region Private Methods
 
         private void ApplyResources(Control parent, CultureInfo culture)
         {
@@ -58,17 +99,17 @@ namespace GoStreamAudioGUI
                 if (ctl.GetType() == typeof(AppMenuStrip))
                 {
                     AppMenuStrip mStrip = (AppMenuStrip)ctl;
-                    
+
                     foreach (ToolStripMenuItem item in mStrip.Items)
                     {
                         ApplyMenus(item.DropDownItems, culture);
-                        this.resManager.ApplyResources(item, item.Name, culture);                        
+                        this.resManager.ApplyResources(item, item.Name, culture);
                     }
-                }                
+                }
                 else if (ctl.GetType() == typeof(ListView))
                 {
                     ListView mList = (ListView)ctl;
-                    
+
                     foreach (ColumnHeader item in mList.Columns)
                     {
                         resManager.ApplyResources(item, item.Name, culture);
@@ -97,28 +138,7 @@ namespace GoStreamAudioGUI
             }
         }
 
-        protected void OnCultureChanged()
-        {
-            var temp = this.CultureChanged;
-            if (temp != null)
-                temp(this, EventArgs.Empty);
-        }
+        #endregion
 
-        public static CultureInfo GlobalUICulture
-        {
-            get { return Thread.CurrentThread.CurrentUICulture; }
-            set
-            {
-                if (GlobalUICulture.Equals(value) == false)
-                {
-                    foreach (var form in Application.OpenForms.OfType<LocalizedForm>())
-                    {
-                        form.Culture = value;
-                    }
-
-                    Thread.CurrentThread.CurrentUICulture = value;
-                }
-            }
-        }
     }
 }
