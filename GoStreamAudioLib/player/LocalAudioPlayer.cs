@@ -345,19 +345,19 @@ namespace GoStreamAudioLib
         }
         #endregion
 
-        public void CloseFile()
-        {
-            if (this.wavePlayer != null)
-            {
-                this.wavePlayer.Stop();
-            }
-            if (this.file != null)
-            {
-                this.file.Close();
-                this.file.Dispose();
-                this.file = null;
-            }
-        }
+        //public void CloseFile()
+        //{
+        //    if (this.wavePlayer != null)
+        //    {
+        //        this.wavePlayer.Stop();
+        //    }
+        //    if (this.file != null)
+        //    {
+        //        this.file.Close();
+        //        this.file.Dispose();
+        //        this.file = null;
+        //    }
+        //}
 
         public void Dispose()
         {

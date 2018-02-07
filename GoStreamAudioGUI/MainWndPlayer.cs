@@ -300,25 +300,32 @@ namespace GoStreamAudioGUI
             Action action;
             //action = () =>
             //    {
-                    if (audioPlayer != null)
-                    {
+            try
+            {
+                if (audioPlayer != null)
+                {
                     //waitHandle.Set();
-                        if (audioPlayer.IsPlaying() || audioPlayer.IsPaused())
-                        {
-                            audioPlayer.StopPlayback();
-                        }
-                        while (isWaitingHandle)
-                        {
-                        }
-                        audioPlayer.PlaybackResumed -= audioPlayer_PlaybackResumed;
-                        audioPlayer.PlaybackStopped -= audioPlayer_PlaybackStopped;
-                        if (dispose)
-                        {
-                            audioPlayer.Dispose();
-                            audioPlayer = null;
-                        }
-                        
+                    if (audioPlayer.IsPlaying() || audioPlayer.IsPaused())
+                    {
+                        audioPlayer.StopPlayback();
                     }
+                    while (isWaitingHandle)
+                    {
+                    }
+                    audioPlayer.PlaybackResumed -= audioPlayer_PlaybackResumed;
+                    audioPlayer.PlaybackStopped -= audioPlayer_PlaybackStopped;
+                    if (dispose)
+                    {
+                        audioPlayer.Dispose();
+                        audioPlayer = null;
+                    }
+
+                }
+            }
+            catch (Exception)
+            {
+                //throw;
+            }
             //    };
             //Invoke(action);
             try
@@ -911,12 +918,19 @@ namespace GoStreamAudioGUI
 
                                 if (File.Exists(mAudioFile))
                                 {
-                                    InitPlayer(true);
-                                    plWnd.HasUserSelTrack = false;
-                                    InitBgWorker();
-                                    StartPlaybackThread();
-                                    NextTrackStarted(this, e);
-                                    UpdateMarquee();
+                                    try
+                                    {
+                                        InitPlayer(true);
+                                        plWnd.HasUserSelTrack = false;
+                                        InitBgWorker();
+                                        StartPlaybackThread();
+                                        NextTrackStarted(this, e);
+                                        UpdateMarquee();
+                                    }
+                                    catch (Exception)
+                                    {                                       
+                                        //throw;
+                                    }
                                 }
                                 //else
                                 //    MessageBox.Show(string.Format("File {0} not found!", mAudioFile));
@@ -924,7 +938,14 @@ namespace GoStreamAudioGUI
                             }
                             else
                             {
-                                StopPlayback();
+                                try
+                                {
+                                    StopPlayback();
+                                }
+                                catch (Exception)
+                                {
+                                    //throw;
+                                }
                                 plWnd.LastFileIdx = -1;
                                 IsPlaylistRunning = false;
                                 EnableButtons(false);
@@ -1233,8 +1254,8 @@ namespace GoStreamAudioGUI
                     {
                         isWaitingHandle = false;
                         waitHandle.Set();
-                        if (File.Exists(mAudioFile))
-                            UpdateMarquee();
+                        //if (File.Exists(mAudioFile))
+                        //    UpdateMarquee();
                     }
                     else
                     {
@@ -1271,8 +1292,8 @@ namespace GoStreamAudioGUI
                             isWaitingHandle = false;
                             //audioPlayer.PlaybackStopType = PlaybackStopTypes.PlaybackStoppedByUser;
                             waitHandle.Set();
-                            if (File.Exists(mAudioFile))
-                                UpdateMarquee();
+                            //if (File.Exists(mAudioFile))
+                            //    UpdateMarquee();
                         }
                         else
                         {

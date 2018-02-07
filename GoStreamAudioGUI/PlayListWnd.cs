@@ -444,26 +444,38 @@ namespace GoStreamAudioGUI
         public bool StartPlaying(string fName, int plPos)
         {
             bool canPlay = false;
-            parent.EnableButtons(false);
-            if (parent.IsWaitingHandle)
-            {                
-                //parent.IsPlaylistRunning = true;
-                parent.IsWaitingHandle = false;
-                parent.WaitHandle.Set();                
-            }
-            
-            if (File.Exists(fName))
-            {                
-                parent.AudioFile = fName;
-                parent.InitPlayer();
-                parent.InitBgWorker();
-                parent.StartPlaybackThread();
-                
-                canPlay = true;
-            }
-            else
+            try
             {
-                MessageBox.Show(string.Format("File {0} not found!", fName));
+                parent.EnableButtons(false);
+                if (parent.IsWaitingHandle)
+                {
+                    LastFileIdx = plPos;
+                    canPlay = true;
+
+                    parent.IsWaitingHandle = false;
+                    parent.WaitHandle.Set();
+                }
+                else
+                {
+                    if (File.Exists(fName))
+                    {
+                        parent.AudioFile = fName;
+                        parent.InitPlayer();
+                        parent.InitBgWorker();
+                        parent.StartPlaybackThread();
+
+                        canPlay = true;
+                    }
+                    else
+                    {
+                        MessageBox.Show(string.Format("File {0} not found!", fName));
+                    }
+                }
+            }
+            catch (Exception)
+            {
+                
+                throw;
             }
             return canPlay;
         }
@@ -471,9 +483,17 @@ namespace GoStreamAudioGUI
         private AudioFileInfo GetAudioFileInfo(ListViewItem item)
         {
             AudioFileInfo afInfo = null;
-            if (item.Text != "")
+            try
             {
-                afInfo = new AudioFileInfo(item.SubItems[0].Text, item.SubItems[2].Text); //, TimeSpan.Zero);
+                if (item.Text != "")
+                {
+                    afInfo = new AudioFileInfo(item.SubItems[0].Text, item.SubItems[2].Text); //, TimeSpan.Zero);
+                }
+            }
+            catch (Exception)
+            {
+                
+                throw;
             }
             return afInfo;
         }
@@ -593,7 +613,10 @@ namespace GoStreamAudioGUI
             else
             {
                 this.l.SelectedItems.Clear();
-                MessageBox.Show("No Item is selected");
+                Invoke((Action)(() =>
+                {
+                    MessageBox.Show(this, "No Item is selected");
+                }));
             }
         }
         /*
