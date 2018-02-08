@@ -2,13 +2,14 @@
 using System;
 using System.Diagnostics;
 using System.Drawing;
+using System.Threading;
 using System.Windows.Forms;
 
 namespace GoStreamAudioGUI
 {
     public class MarqueeLabel : Label
     {
-        public Timer MarqueeTimer { get; set; }
+        public System.Windows.Forms.Timer MarqueeTimer { get; set; }
         public int Speed { get; set; }
         public int yOffset { get; set; }
 
@@ -62,7 +63,7 @@ namespace GoStreamAudioGUI
             backBrush = new SolidBrush(this.BackColor);
             yOffset = 0;
             Speed = 1;
-            MarqueeTimer = new Timer();
+            MarqueeTimer = new System.Windows.Forms.Timer();
             MarqueeTimer.Interval = 25;
             MarqueeTimer.Enabled = true;
             MarqueeTimer.Tick += (aSender, eArgs) =>
@@ -125,32 +126,42 @@ namespace GoStreamAudioGUI
 
         private void MarqueeLabel_DoubleClick(object sender, EventArgs e)
         {
-            if (this.filePlayingFullPath != null
-                && this.filePlayingFullPath != ""
-                && this.filePlayingFullPath.ToLowerInvariant().EndsWith(".mp3"))
+            Thread t = new Thread(delegate()
             {
-                try
+                if (this.filePlayingFullPath != null
+                    && this.filePlayingFullPath != ""
+                    && this.filePlayingFullPath.ToLowerInvariant().EndsWith(".mp3"))
                 {
-                    Mp3TagManager tagMan = new Mp3TagManager();
-                    DialogResult dr = tagMan.LoadTagInfo("Edit Mp3 Tag", this.filePlayingFullPath, this.audioPlayer);
-                    if (dr == DialogResult.Cancel)
+                    try
                     {
-                        tagMan.CleanUp();
-                        tagMan.Close();
-                        tagMan.Dispose();
+                        Invoke((Action)(() =>
+                        {
+                            Mp3TagManager tagMan = new Mp3TagManager();
+                            DialogResult dr = tagMan.LoadTagInfo("Edit Mp3 Tag", this.filePlayingFullPath, this.audioPlayer);
+                            if (dr == DialogResult.Cancel)
+                            {
+                                tagMan.CleanUp();
+                                tagMan.Close();
+                                tagMan.Dispose();
+                            }
+                            else if (dr == DialogResult.OK)
+                            {
+                                tagMan.CleanUp();
+                                tagMan.Close();
+                                tagMan.Dispose();
+                            }
+                        }));
                     }
-                    else if (dr == DialogResult.OK)
+                    catch (Exception ex)
                     {
-                        tagMan.CleanUp();
-                        tagMan.Close();
-                        tagMan.Dispose();
+                        Invoke((Action)(() =>
+                        {
+                            MessageBox.Show(string.Format("Error reading tag info: {0}", ex.Message));
+                        }));
                     }
                 }
-                catch (Exception ex)
-                {
-                    MessageBox.Show(string.Format("Error reading tag info: {0}", ex.Message));
-                }
-            }
+            });
+            t.Start();
         }
 
         #endregion

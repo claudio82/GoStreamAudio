@@ -27,6 +27,7 @@ namespace GoStreamAudioGUI
         static TextBox txtAlbum;
         static PictureBox picBox;
         static TagLib.File file;
+        static string tempImageFileName = string.Empty;
 
         #region Public Methods
 
@@ -120,6 +121,8 @@ namespace GoStreamAudioGUI
             picBox = new PictureBox() { Left = 70, Width = 128, Height = 128, Top = 290 };
             picBox.Name = "pictureBox";
             picBox.SizeMode = PictureBoxSizeMode.StretchImage;
+            picBox.WaitOnLoad = false;
+            picBox.LoadCompleted += LoadCompleted;
             cm = new ContextMenu();
             cm.MenuItems.Add(CM_CHANGE, new EventHandler(Addpicture_Click));
             cm.MenuItems.Add(CM_GETONLINE, new EventHandler(GetpictureOnline_Click));
@@ -134,10 +137,30 @@ namespace GoStreamAudioGUI
                     TagLib.Picture fstPic = new TagLib.Picture(pictures[0].Data);
                     if (fstPic != null)
                     {
-                        MemoryStream ms = new MemoryStream(fstPic.Data.ToArray());
-                        System.Drawing.Image image = System.Drawing.Image.FromStream(ms);
-                        var img = image;
-                        picBox.Image = img;
+                        //MemoryStream ms = new MemoryStream(fstPic.Data.ToArray());
+                        //System.Drawing.Image image = System.Drawing.Image.FromStream(ms);
+                        //var img = image;
+                        //picBox.Image = img;
+
+                        
+                        try
+                        {
+                            tempImageFileName = Path.Combine(Path.GetTempPath(), Path.GetTempFileName() + ".jpg");
+                            using (FileStream fileStream = new FileStream(tempImageFileName, FileMode.OpenOrCreate, FileAccess.ReadWrite))
+                            {
+                                using (BinaryWriter writer = new BinaryWriter(fileStream))
+                                {
+                                    writer.Write(fstPic.Data.ToArray());
+                                }
+                            }
+
+                            picBox.LoadAsync(tempImageFileName);
+                        }
+                        catch (Exception)
+                        {
+                            Debug.WriteLine(string.Format("Cannot save temp image file: {0}", tempImageFileName));
+                        }                        
+
                         cm.MenuItems[0].Enabled = false;
                         cm.MenuItems[1].Enabled = false;
                         cm.MenuItems.Add(CM_REMOVE, new EventHandler(Removepicture_Click));
@@ -203,9 +226,9 @@ namespace GoStreamAudioGUI
             prompt.Controls.Add(nudTrackNum);
             prompt.Controls.Add(lblPict);
             prompt.Controls.Add(picBox);
-            return prompt.ShowDialog();
+            return prompt.ShowDialog(this);
         }
-
+        
         /// <summary>
         /// performs clean up of resources 
         /// </summary>
@@ -235,6 +258,34 @@ namespace GoStreamAudioGUI
         #endregion
 
         #region Private Methods
+
+        /// <summary>
+        /// this event is raised when picture is loaded
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void LoadCompleted(object sender, System.ComponentModel.AsyncCompletedEventArgs e)
+        {
+            if (e.Error != null)
+            {
+                // will get this if there's an error loading the file
+            } if (e.Cancelled)
+            {
+                // would get this if you have code that calls pictureBox1.CancelAsync()
+            }
+            else
+            {
+                // picture was loaded successfully
+                try
+                {
+                    File.Delete(tempImageFileName);
+                }
+                catch (Exception)
+                {
+
+                }
+            }
+        }
 
         /// <summary>
         /// downloads a cover image from a remote service
