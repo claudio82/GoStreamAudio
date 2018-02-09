@@ -246,8 +246,10 @@ namespace GoStreamAudioGUI
                         item.Click -= GetpictureOnline_Click;
                 }
             }
+            if (picBox != null)
+                picBox.LoadCompleted -= LoadCompleted;
             if (prompt != null)
-            {
+            {                
                 prompt.Close();
                 prompt.Dispose();
                 prompt = null;
