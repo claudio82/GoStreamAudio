@@ -61,6 +61,18 @@ namespace GoStreamAudioGUI
             }
         }
 
+        private void btnStop_Click(object sender, EventArgs e)
+        {
+            if (audioPlayer.StreamingPlaybackState == StreamingPlaybackState.Buffering
+                || audioPlayer.StreamingPlaybackState == StreamingPlaybackState.Playing)
+            {
+                audioPlayer.StopPlayback();
+                timer1.Enabled = false;
+                workingThread.Abort();
+                workingThread = null;
+            }
+        }
+
         private void DoJob(object obj)
         {
             audioPlayer.StreamMp3();
@@ -75,5 +87,6 @@ namespace GoStreamAudioGUI
                 workingThread = null;
             }
         }
+
     }
 }
