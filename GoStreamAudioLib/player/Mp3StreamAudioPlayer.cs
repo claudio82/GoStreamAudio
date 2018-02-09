@@ -112,7 +112,7 @@ namespace GoStreamAudioLib
                     if (e.Status != WebExceptionStatus.RequestCanceled)
                     {
                         Debug.WriteLine("Web Exception error : " + e.Message);
-                        //ShowError(e.Message);
+                        playbackState = StreamingPlaybackState.Stopped;
                     }
                     return;
                 }
