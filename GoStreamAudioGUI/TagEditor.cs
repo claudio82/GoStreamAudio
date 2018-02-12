@@ -3,13 +3,12 @@ using Luminescence.Xiph;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
-//using System.Data;
 using System.Diagnostics;
 using System.Drawing;
 using System.IO;
 using System.Linq;
 using System.Net;
-//using System.Text;
+using System.Resources;
 using System.Web;
 using System.Windows.Forms;
 using System.Xml;
@@ -20,24 +19,44 @@ namespace GoStreamAudioGUI
 {
     public partial class TagEditor : Form
     {
-        const string CM_CHANGE = "Change";
-        const string CM_REMOVE = "Remove";
-        const string CM_GETONLINE = "Get picture from online service (Last.fm)";
+        //const string CM_CHANGE = "Change";
+        //const string CM_REMOVE = "Remove";
+        //const string CM_GETONLINE = "Get picture from online service (Last.fm)";
         const string LFM_BASE_URL = "http://ws.audioscrobbler.com/2.0/";
         const string LFM_METHOD = "album.getinfo";
         const string LFM_API_KEY = "57ee3318536b23ee81d6b27e36997cde";
-        //static ContextMenu cm;
         
         static TagLib.File file;
         static VorbisComment vbTagger;
         static string tempImageFileName = string.Empty;
+        static string cmChange;
+        static string cmRemove;
+        static string cmGetOnline;
 
         LocalAudioPlayer player;
         string fileName;
+        ResourceManager rm;
 
         public TagEditor()
         {
             InitializeComponent();
+            // Create a resource manager to retrieve resources.
+            rm = new ResourceManager(typeof(GoStreamAudioGUI.TagEditor));
+            this.Text = rm.GetString("lblFormTitle");
+            this.lblTitle.Text = rm.GetString("lblTitle");
+            this.lblArtist.Text = rm.GetString("lblArtist");
+            this.lblAlbum.Text = rm.GetString("lblAlbum");
+            this.lblGenre.Text = rm.GetString("lblGenre");
+            this.lblYear.Text = rm.GetString("lblYear");
+            this.lblTrackNum.Text = rm.GetString("lblTrackNum");
+            this.lblPicture.Text = rm.GetString("lblPicture");
+            this.btnUpdate.Text = rm.GetString("btnUpdate");
+            cmChange = rm.GetString("cMenuChange");
+            cmRemove = rm.GetString("cMenuRemove");
+            cmGetOnline = rm.GetString("cMenuGetOnline");
+            this.cMenu.Items[0].Text = cmChange;
+            this.cMenu.Items[1].Text = cmGetOnline;
+            this.cMenu.Items[2].Text = cmRemove;
         }
 
         #region Public Methods
@@ -78,11 +97,11 @@ namespace GoStreamAudioGUI
             {
                 foreach (ToolStripItem item in cMenu.Items)
                 {
-                    if ((string)item.Text == CM_CHANGE)
+                    if ((string)item.Text == cmChange)
                         item.Click -= Addpicture_Click;
-                    if ((string)item.Text == CM_REMOVE)
+                    if ((string)item.Text == cmRemove)
                         item.Click -= Removepicture_Click;
-                    if ((string)item.Text == CM_GETONLINE)
+                    if ((string)item.Text == cmGetOnline)
                         item.Click -= GetpictureOnline_Click;
                 }
             }
@@ -99,6 +118,11 @@ namespace GoStreamAudioGUI
                 
         #endregion
 
+        #region Private Methods
+        
+        /// <summary>
+        /// loads information from MP3 tag
+        /// </summary>
         private void LoadMp3Information()
         {
             try
@@ -205,6 +229,9 @@ namespace GoStreamAudioGUI
 
         }
 
+        /// <summary>
+        /// loads information from Vorbis tag
+        /// </summary>
         private void LoadVorbisInformation()
         {
             try
@@ -272,7 +299,7 @@ namespace GoStreamAudioGUI
                 }
                 //else
                 //{
-                    //pictBox.Image = GoStreamAudioGUI.Properties.Resources.noPic;
+                //pictBox.Image = GoStreamAudioGUI.Properties.Resources.noPic;
                 //}
             }
         }
@@ -345,12 +372,12 @@ namespace GoStreamAudioGUI
                                     //bool hasRemove = false;
                                     foreach (ToolStripItem item in cMenu.Items)
                                     {
-                                        if ((string)item.Text == CM_REMOVE)
+                                        if ((string)item.Text == cmRemove)
                                         {
                                             item.Enabled = true;
                                         }
-                                        if ((string)item.Text == CM_CHANGE
-                                            || (string)item.Text == CM_GETONLINE)
+                                        if ((string)item.Text == cmChange
+                                            || (string)item.Text == cmGetOnline)
                                         {
                                             item.Enabled = false;
                                         }
@@ -391,6 +418,15 @@ namespace GoStreamAudioGUI
             }
         }
 
+        #endregion
+
+        #region Event handlers
+
+        /// <summary>
+        /// this event is raised when image is loaded
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         private void LoadCompleted(object sender, AsyncCompletedEventArgs e)
         {
             if (e.Error != null)
@@ -514,18 +550,16 @@ namespace GoStreamAudioGUI
                         //bool hasRemove = false;
                         foreach (ToolStripItem item in cMenu.Items)
                         {
-                            if ((string)item.Text == CM_REMOVE)
+                            if ((string)item.Text == cmRemove)
                             {
                                 item.Enabled = true;
                             }
-                            if ((string)item.Text == CM_CHANGE
-                                || (string)item.Text == CM_GETONLINE)
+                            if ((string)item.Text == cmChange
+                                || (string)item.Text == cmGetOnline)
                             {
                                 item.Enabled = false;
                             }
-                        }
-                        //if (!hasRemove)
-                        //    cm.MenuItems.Add(CM_REMOVE, new EventHandler(Removepicture_Click));
+                        }                       
                     }
                 }
                 catch (Exception)
@@ -578,12 +612,12 @@ namespace GoStreamAudioGUI
                             pictBox.Image = GoStreamAudioGUI.Properties.Resources.noPic;
                             foreach (ToolStripItem item in cMenu.Items)
                             {
-                                if ((string)item.Text == CM_REMOVE)
+                                if ((string)item.Text == cmRemove)
                                 {
                                     item.Enabled = false;
                                 }
-                                if ((string)item.Text == CM_CHANGE
-                                    || (string)item.Text == CM_GETONLINE)
+                                if ((string)item.Text == cmChange
+                                    || (string)item.Text == cmGetOnline)
                                 {
                                     item.Enabled = true;
                                 }
@@ -597,5 +631,8 @@ namespace GoStreamAudioGUI
                 }
             }
         }
+
+        #endregion
+
     }
 }

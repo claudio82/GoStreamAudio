@@ -142,6 +142,9 @@
     <EmbeddedResource Include="PlayListWnd.resx">
       <DependentUpon>PlayListWnd.cs</DependentUpon>
     </EmbeddedResource>
+    <EmbeddedResource Include="TagEditor.it-IT.resx">
+      <DependentUpon>TagEditor.cs</DependentUpon>
+    </EmbeddedResource>
     <EmbeddedResource Include="TagEditor.resx">
       <DependentUpon>TagEditor.cs</DependentUpon>
     </EmbeddedResource>

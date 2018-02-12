@@ -129,36 +129,33 @@
     <value>Album</value>
   </data>
   <data name="lblArtist" xml:space="preserve">
-    <value>Artist</value>
+    <value>Artista</value>
   </data>
   <data name="lblGenre" xml:space="preserve">
-    <value>Genre</value>
+    <value>Genere</value>
   </data>
   <data name="lblPicture" xml:space="preserve">
-    <value>Picture</value>
+    <value>Immagine</value>
   </data>
   <data name="lblTitle" xml:space="preserve">
-    <value>Title</value>
+    <value>Titolo</value>
   </data>
   <data name="lblTrackNum" xml:space="preserve">
-    <value>Track #</value>
+    <value># Traccia</value>
   </data>
   <data name="lblYear" xml:space="preserve">
-    <value>Year</value>
+    <value>Anno</value>
   </data>
   <data name="btnUpdate" xml:space="preserve">
-    <value>Update</value>
-  </data>
-  <data name="lblFormTitle" xml:space="preserve">
-    <value>Tag Editor</value>
+    <value>Modifica</value>
   </data>
   <data name="cMenuChange" xml:space="preserve">
-    <value>Change</value>
+    <value>Cambia</value>
   </data>
   <data name="cMenuGetOnline" xml:space="preserve">
-    <value>Get from online service (Last.fm)</value>
+    <value>Recupera da servizio online (Last.fm)</value>
   </data>
   <data name="cMenuRemove" xml:space="preserve">
-    <value>Remove</value>
+    <value>Rimuovi</value>
   </data>
 </root>
