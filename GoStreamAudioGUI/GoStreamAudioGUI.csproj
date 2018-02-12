@@ -51,6 +51,10 @@
     <ApplicationIcon>img\player.ico</ApplicationIcon>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="Luminescence.Xiph, Version=2.5.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\packages\Luminescence.Xiph.dll</HintPath>
+    </Reference>
     <Reference Include="policy.2.0.taglib-sharp, Version=0.0.0.0, Culture=neutral, PublicKeyToken=db62eba44689b5b0, processorArchitecture=MSIL">
       <HintPath>..\packages\taglib.2.1.0.0\lib\policy.2.0.taglib-sharp.dll</HintPath>
       <Private>True</Private>
@@ -94,9 +98,6 @@
     <Compile Include="MainWndPlayer.Designer.cs">
       <DependentUpon>MainWndPlayer.cs</DependentUpon>
     </Compile>
-    <Compile Include="Mp3TagManager.cs">
-      <SubType>Form</SubType>
-    </Compile>
     <Compile Include="PlayListEntry.cs" />
     <Compile Include="PlayListShuffler.cs" />
     <Compile Include="PlayListWnd.cs">
@@ -104,6 +105,12 @@
     </Compile>
     <Compile Include="PlayListWnd.Designer.cs">
       <DependentUpon>PlayListWnd.cs</DependentUpon>
+    </Compile>
+    <Compile Include="TagEditor.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="TagEditor.Designer.cs">
+      <DependentUpon>TagEditor.cs</DependentUpon>
     </Compile>
     <Compile Include="test\TestAlbumArt.cs">
       <SubType>Form</SubType>
@@ -134,6 +141,9 @@
     </EmbeddedResource>
     <EmbeddedResource Include="PlayListWnd.resx">
       <DependentUpon>PlayListWnd.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="TagEditor.resx">
+      <DependentUpon>TagEditor.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="test\TestAlbumArt.resx">
       <DependentUpon>TestAlbumArt.cs</DependentUpon>

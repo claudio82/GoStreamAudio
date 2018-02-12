@@ -3,6 +3,7 @@ using NAudio.Wave;
 using NAudio.Flac;
 using System;
 using System.Diagnostics;
+using Luminescence.Xiph;
 
 namespace GoStreamAudioLib
 {
@@ -25,6 +26,7 @@ namespace GoStreamAudioLib
         private AudioFileReader file;
         private VorbisWaveReader vorbisReader;
         private FlacReader flacReader;
+        private string fileName;
         public PlaybackStopTypes PlaybackStopType { get; set; }
 
         #region Constructor
@@ -36,6 +38,7 @@ namespace GoStreamAudioLib
         /// <param name="waveOutType">the wave out type to use</param>
         public LocalAudioPlayer(string fileName, WaveOutType waveOutType)
         {
+            this.fileName = fileName;
             PlaybackStopType = PlaybackStopTypes.PlaybackStoppedReachingEndOfFile;
             Debug.Assert(this.wavePlayer == null);
             this.wavePlayer = CreateWavePlayer(waveOutType);
@@ -283,6 +286,66 @@ namespace GoStreamAudioLib
                     wavePlayer.Init(file);
                     SetVolume(curVol);
                     //wavePlayer.Play();
+                }
+            }
+        }
+
+        /// <summary>
+        /// saves vorbis ogg or flac tag information to file
+        /// </summary>
+        /// <param name="taglibFile"></param>
+        public void SaveVorbisTag(VorbisComment taglibFile)
+        {
+            if (taglibFile != null)
+            {
+                //string fName = file.FileName;
+                //AudioFileReader prev = file;
+                if (flacReader != null)
+                {
+                    //float curVol = file.Volume;
+                    wavePlayer.Stop();
+                    
+                    string prevFile = this.fileName;
+
+                    this.flacReader.Close();
+                    this.flacReader.Dispose();
+                    this.flacReader = null;
+
+                    try
+                    {
+                        taglibFile.SaveMetadata();
+                    }
+                    catch (UnauthorizedAccessException)
+                    { }
+                    catch (Exception)
+                    { }
+
+                    this.flacReader = new FlacReader(prevFile);
+                    wavePlayer.Init(this.flacReader);
+                    //SetVolume(curVol);                    
+                }
+                else if (vorbisReader != null)
+                {
+                    wavePlayer.Stop();
+
+                    string prevFile = this.fileName;
+
+                    this.vorbisReader.Close();
+                    this.vorbisReader.Dispose();
+                    this.vorbisReader = null;
+
+                    try
+                    {
+                        taglibFile.SaveMetadata();
+                    }
+                    catch (UnauthorizedAccessException)
+                    { }
+                    catch (Exception)
+                    { }
+
+                    this.vorbisReader = new VorbisWaveReader(prevFile);
+                    wavePlayer.Init(this.vorbisReader);
+                    //SetVolume(curVol);                    
                 }
             }
         }

@@ -7,7 +7,9 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GoStreamAudioGUI", "GoStrea
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GoStreamAudioLib", "GoStreamAudioLib\GoStreamAudioLib.csproj", "{6BFEAC69-43C6-494E-9B5F-4844F2C10D06}"
 EndProject
-Project("{54435603-DBB4-11D2-8724-00A0C9A8B90C}") = "GoStreamAudioSetup", "GoStreamAudioSetup\GoStreamAudioSetup.vdproj", "{84F8F8D1-F202-4F4B-8C34-5DAFDF429B34}"
+Project("{54435603-DBB4-11D2-8724-00A0C9A8B90C}") = "GoStreamAudio", "GoStreamAudioSetup\GoStreamAudioSetup.vdproj", "{84F8F8D1-F202-4F4B-8C34-5DAFDF429B34}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Luminescence.Xiph", "Luminescence.Xiph\Luminescence.Xiph.csproj", "{B3B0288A-6CA1-4482-BC4D-94C344B91E30}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -25,6 +27,10 @@ Global
 		{6BFEAC69-43C6-494E-9B5F-4844F2C10D06}.Release|Any CPU.Build.0 = Release|Any CPU
 		{84F8F8D1-F202-4F4B-8C34-5DAFDF429B34}.Debug|Any CPU.ActiveCfg = Debug
 		{84F8F8D1-F202-4F4B-8C34-5DAFDF429B34}.Release|Any CPU.ActiveCfg = Release
+		{B3B0288A-6CA1-4482-BC4D-94C344B91E30}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{B3B0288A-6CA1-4482-BC4D-94C344B91E30}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{B3B0288A-6CA1-4482-BC4D-94C344B91E30}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{B3B0288A-6CA1-4482-BC4D-94C344B91E30}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

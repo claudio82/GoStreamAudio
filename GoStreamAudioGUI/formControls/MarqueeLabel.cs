@@ -129,38 +129,35 @@ namespace GoStreamAudioGUI
             Thread t = new Thread(delegate()
             {
                 if (this.filePlayingFullPath != null
-                    && this.filePlayingFullPath != ""
-                    && this.filePlayingFullPath.ToLowerInvariant().EndsWith(".mp3"))
+                    && this.filePlayingFullPath != "")
                 {
-                    try
+                    if (this.filePlayingFullPath.ToLowerInvariant().EndsWith(".mp3")
+                        || this.filePlayingFullPath.ToLowerInvariant().EndsWith(".ogg")
+                        || this.filePlayingFullPath.ToLowerInvariant().EndsWith(".flac"))
                     {
-                        Invoke((Action)(() =>
+                        try
                         {
-                            Mp3TagManager tagMan = new Mp3TagManager();
-                            DialogResult dr = tagMan.LoadTagInfo("Edit Mp3 Tag", this.filePlayingFullPath, this.audioPlayer);
-                            if (dr == DialogResult.Cancel)
+                            Invoke((Action)(() =>
                             {
-                                tagMan.CleanUp();
-                                tagMan.Close();
-                                tagMan.Dispose();
-                            }
-                            else if (dr == DialogResult.OK)
-                            {
-                                tagMan.CleanUp();
-                                tagMan.Close();
-                                tagMan.Dispose();
-                            }
-                        }));
-                    }
-                    catch (Exception ex)
-                    {
-                        Invoke((Action)(() =>
+                                TagEditor tEditor = new TagEditor();
+                                tEditor.LoadTagInfo(this.filePlayingFullPath, this.audioPlayer,
+                                    this.filePlayingFullPath.ToLowerInvariant().EndsWith(".mp3") == true ? true : false);
+                                DialogResult dr = tEditor.ShowDialog(this);
+                                tEditor.CleanUp();
+                                tEditor.Dispose();
+                            }));
+                        }
+                        catch (Exception ex)
                         {
-                            MessageBox.Show(string.Format("Error reading tag info: {0}", ex.Message));
-                        }));
+                            Invoke((Action)(() =>
+                            {
+                                MessageBox.Show(string.Format("Error reading tag info: {0}", ex.Message));
+                            }));
+                        }
                     }
                 }
             });
+            t.Priority = ThreadPriority.BelowNormal;
             t.Start();
         }
 
