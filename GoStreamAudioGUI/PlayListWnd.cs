@@ -460,14 +460,17 @@ namespace GoStreamAudioGUI
         /// <returns></returns>
         private bool StartPlaying(string fName, int plPos)
         {
-            bool canPlay = false;
+            bool hasQueue = false;
             try
             {
                 parent.EnableButtons(false);
                 if (parent.IsWaitingHandle)
                 {
+                    if (!parent.IsPlaylistRunning)
+                        parent.IsPlaylistRunning = true;
+                    HasUserSelTrack = true;
                     LastFileIdx = plPos;
-                    canPlay = true;
+                    hasQueue = true;
 
                     parent.IsWaitingHandle = false;
                     parent.WaitHandle.Set();
@@ -479,9 +482,7 @@ namespace GoStreamAudioGUI
                         parent.AudioFile = fName;
                         parent.InitPlayer();
                         parent.InitBgWorker();
-                        parent.StartPlaybackThread();
-
-                        canPlay = true;
+                        parent.StartPlaybackThread();                       
                     }
                     else
                     {
@@ -494,7 +495,7 @@ namespace GoStreamAudioGUI
 
                 throw;
             }
-            return canPlay;
+            return hasQueue;
         }
 
         /// <summary>
@@ -569,23 +570,23 @@ namespace GoStreamAudioGUI
                 lastFileIdx = item.Index;
                 parent.UserStopped = false;
                 AudioFileInfo afInfo = GetAudioFileInfo(item);
-                if (StartPlaying(afInfo.FullPath, lastFileIdx))
-                {
-                    item.ForeColor = item.SubItems[1].ForeColor = Color.Blue;
-                    //parent.IsPlaylistRunning = true;
+                bool hasQueue = StartPlaying(afInfo.FullPath, lastFileIdx);
+                
+                item.ForeColor = item.SubItems[1].ForeColor = Color.Blue;
+                //parent.IsPlaylistRunning = true;
 
-                    if (parent.AudioPlayer != null)
-                    {                        
-                        if (l.Items[lastFileIdx].SubItems[1].Text == "")
-                        {
-                            l.Items[lastFileIdx].SubItems[1].Text = Utils.FormatTimeSpan2(parent.AudioPlayer.GetTotalTime());
-                            l.Columns[1].AutoResize(ColumnHeaderAutoResizeStyle.ColumnContent);
-                        }
+                if (!hasQueue && parent.AudioPlayer != null)
+                {                        
+                    if (l.Items[lastFileIdx].SubItems[1].Text == "")
+                    {
+                        l.Items[lastFileIdx].SubItems[1].Text = Utils.FormatTimeSpan2(parent.AudioPlayer.GetTotalTime());
+                        l.Columns[1].AutoResize(ColumnHeaderAutoResizeStyle.ColumnContent);
                     }
-
-                    //MessageBox.Show("The selected Item Name is: " + item.Text);
-                    OnPlaylistItemDoubleClicked(e);
                 }
+
+                //MessageBox.Show("The selected Item Name is: " + item.Text);
+                OnPlaylistItemDoubleClicked(e);
+                
             }
             else
             {

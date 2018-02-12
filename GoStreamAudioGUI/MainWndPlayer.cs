@@ -663,78 +663,77 @@ namespace GoStreamAudioGUI
 
                 if (IsPlaylistRunning)
                 {
-                    if (!isSingleFilePlaying)
+                    if (isSingleFilePlaying) //!isSingleFilePlaying)
                     {
-                        if (!userStopped)
+                        isSingleFilePlaying = false;
+                    }
+                        int aPos = -1;
+
+                        if (plWnd.HasUserSelTrack)
                         {
-                            int aPos = -1;
-
-                            if (plWnd.HasUserSelTrack)
+                            aPos = plWnd.LastFileIdx;
+                            plWnd.LastFileIdx = aPos;
+                            //plWnd.HasUserSelTrack = false;
+                        }
+                        else
+                        {
+                            CurrentTrackCompleted(this, e);
+                            if (!mIsShuffleChecked)
                             {
-                                aPos = plWnd.LastFileIdx;
-                                plWnd.LastFileIdx = aPos;
-                                //plWnd.HasUserSelTrack = false;
+                                aPos = plWnd.LastFileIdx + 1;
                             }
                             else
                             {
-                                CurrentTrackCompleted(this, e);
-                                if (!mIsShuffleChecked)
-                                {
-                                    aPos = plWnd.LastFileIdx + 1;
-                                }
-                                else
-                                {
-                                    aPos = randSongsIdx[((shuffleCnt + 1)) % plWnd.GetPlaylistSize()].PosInPlayList;
-                                    ++shuffleCnt;
-                                    if (shuffleCnt == plWnd.GetPlaylistSize())
-                                        shuffleCnt = 0;
-                                }
-                                plWnd.LastFileIdx = aPos;
+                                aPos = randSongsIdx[((shuffleCnt + 1)) % plWnd.GetPlaylistSize()].PosInPlayList;
+                                ++shuffleCnt;
+                                if (shuffleCnt == plWnd.GetPlaylistSize())
+                                    shuffleCnt = 0;
                             }
+                            plWnd.LastFileIdx = aPos;
+                        }
 
-                            if (aPos < plWnd.GetPlaylistSize())
-                            {
-                                currentAudioFile = plWnd.GetFileToPlay(aPos);
-                                mAudioFile = currentAudioFile.FullPath;
+                        if (aPos < plWnd.GetPlaylistSize())
+                        {
+                            currentAudioFile = plWnd.GetFileToPlay(aPos);
+                            mAudioFile = currentAudioFile.FullPath;
 
-                                if (File.Exists(mAudioFile))
-                                {
-                                    try
-                                    {
-                                        InitPlayer(true);
-                                        plWnd.HasUserSelTrack = false;
-                                        InitBgWorker();
-                                        StartPlaybackThread();
-                                        NextTrackStarted(this, e);
-                                        UpdateMarquee();
-                                    }
-                                    catch (Exception)
-                                    {
-                                        //throw;
-                                    }
-                                }
-                                //else
-                                //    MessageBox.Show(string.Format("File {0} not found!", mAudioFile));
-                                //++plWnd.LastFileIdx;                            
-                            }
-                            else
+                            if (File.Exists(mAudioFile))
                             {
                                 try
                                 {
-                                    StopPlayback();
+                                    InitPlayer(true);
+                                    plWnd.HasUserSelTrack = false;
+                                    InitBgWorker();
+                                    StartPlaybackThread();
+                                    NextTrackStarted(this, e);
+                                    UpdateMarquee();
                                 }
                                 catch (Exception)
                                 {
                                     //throw;
                                 }
-                                plWnd.LastFileIdx = -1;
-                                IsPlaylistRunning = false;
-                                EnableButtons(false);
                             }
+                            //else
+                            //    MessageBox.Show(string.Format("File {0} not found!", mAudioFile));
+                            //++plWnd.LastFileIdx;                            
                         }
-                    }
-                    else
-                        isSingleFilePlaying = false;
+                        else
+                        {
+                            try
+                            {
+                                StopPlayback();
+                            }
+                            catch (Exception)
+                            {
+                                //throw;
+                            }
+                            plWnd.LastFileIdx = -1;
+                            IsPlaylistRunning = false;
+                            EnableButtons(false);
+                        }
+                    //}
+                    //else
+                    //    isSingleFilePlaying = false;
                 }
                 else
                 {
@@ -811,8 +810,8 @@ namespace GoStreamAudioGUI
         {
             if (File.Exists(mAudioFile))
             {
-                IsPlaylistRunning = true;
-                plWnd.HasUserSelTrack = true;
+                //IsPlaylistRunning = true;
+                //plWnd.HasUserSelTrack = true;
                 chkShuffle.Enabled = true;
                 currentAudioFile = plWnd.GetFileToPlay(plWnd.LastFileIdx);
                 UpdateMarquee();
@@ -946,10 +945,9 @@ namespace GoStreamAudioGUI
                         if (!mIsShuffleChecked)
                             plWnd.LastFileIdx -= 2;
                         isWaitingHandle = false;
-                        //audioPlayer.PlaybackStopType = PlaybackStopTypes.PlaybackStoppedByUser;
                         waitHandle.Set();
-                        if (File.Exists(mAudioFile))
-                            UpdateMarquee();
+                        //if (File.Exists(mAudioFile))
+                        //    UpdateMarquee();
                     }
                     else
                     {
@@ -979,11 +977,9 @@ namespace GoStreamAudioGUI
                     {
                         CurrentTrackCompleted(sender, e);
 
-                        //plWnd.LastFileIdx = plWnd.GetPlaylistSize() - 1;
                         if (bgPlayWorker.IsBusy && isWaitingHandle)
                         {
-                            isWaitingHandle = false;
-                            //audioPlayer.PlaybackStopType = PlaybackStopTypes.PlaybackStoppedByUser;
+                            isWaitingHandle = false;                            
                             waitHandle.Set();
                             if (File.Exists(mAudioFile))
                                 UpdateMarquee();
@@ -1066,11 +1062,9 @@ namespace GoStreamAudioGUI
                     {
                         CurrentTrackCompleted(sender, e);
 
-                        //plWnd.LastFileIdx = plWnd.GetPlaylistSize() - 1;
                         if (bgPlayWorker.IsBusy && isWaitingHandle)
                         {
                             isWaitingHandle = false;
-                            //audioPlayer.PlaybackStopType = PlaybackStopTypes.PlaybackStoppedByUser;
                             waitHandle.Set();
                             //if (File.Exists(mAudioFile))
                             //    UpdateMarquee();
