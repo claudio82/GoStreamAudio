@@ -161,4 +161,7 @@
   <data name="cMenuRemove" xml:space="preserve">
     <value>Remove</value>
   </data>
+  <data name="coverNotFoundMsg" xml:space="preserve">
+    <value>Album art not found.</value>
+  </data>
 </root>

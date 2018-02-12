@@ -158,4 +158,7 @@
   <data name="cMenuRemove" xml:space="preserve">
     <value>Rimuovi</value>
   </data>
+  <data name="coverNotFoundMsg" xml:space="preserve">
+    <value>Copertina non trovata.</value>
+  </data>
 </root>

@@ -369,7 +369,6 @@ namespace GoStreamAudioGUI
                                                 .ConvertTo(image, typeof(byte[]))))
                                     };
 
-                                    //bool hasRemove = false;
                                     foreach (ToolStripItem item in cMenu.Items)
                                     {
                                         if ((string)item.Text == cmRemove)
@@ -381,9 +380,7 @@ namespace GoStreamAudioGUI
                                         {
                                             item.Enabled = false;
                                         }
-                                    }
-                                    //if (!hasRemove)
-                                    //    cMenu.Items.Add(CM_REMOVE, new EventHandler(Removepicture_Click));
+                                    }                                    
                                 }
                             }
                             catch (Exception)
@@ -400,12 +397,12 @@ namespace GoStreamAudioGUI
                         }
                         else
                         {
-                            MessageBox.Show("Album art not found.");
+                            MessageBox.Show(rm.GetString("coverNotFoundMsg"));
                         }
                     }
                     catch (Exception)
                     {
-                        MessageBox.Show("Album art not found.");
+                        MessageBox.Show(rm.GetString("coverNotFoundMsg"));
                     }
                     finally
                     {
@@ -528,38 +525,33 @@ namespace GoStreamAudioGUI
                 string fName = ofDialog.FileName;
                 try
                 {
-                    //Control ctls = this.Controls["pictBox"];
-                    //if (ctls != null)
+                    try
                     {
-                        try
-                        {
-                            //PictureBox pictBox = (PictureBox)ctls;
-                            pictBox.Image = System.Drawing.Image.FromFile(fName);
-                            file.Tag.Pictures = new TagLib.IPicture[]
+                        pictBox.Image = System.Drawing.Image.FromFile(fName);
+                        file.Tag.Pictures = new TagLib.IPicture[]
                             {
                                 new TagLib.Picture(
                                     new TagLib.ByteVector(
                                         (byte[])new System.Drawing.ImageConverter()
                                         .ConvertTo(System.Drawing.Image.FromFile(fName), typeof(byte[]))))
                             };
-                        }
-                        catch (Exception)
+                    }
+                    catch (Exception)
+                    {
+                        Debug.WriteLine("Unable to change the image.");
+                    }
+
+                    foreach (ToolStripItem item in cMenu.Items)
+                    {
+                        if ((string)item.Text == cmRemove)
                         {
-                            Debug.WriteLine("Unable to change the image.");
+                            item.Enabled = true;
                         }
-                        //bool hasRemove = false;
-                        foreach (ToolStripItem item in cMenu.Items)
+                        if ((string)item.Text == cmChange
+                            || (string)item.Text == cmGetOnline)
                         {
-                            if ((string)item.Text == cmRemove)
-                            {
-                                item.Enabled = true;
-                            }
-                            if ((string)item.Text == cmChange
-                                || (string)item.Text == cmGetOnline)
-                            {
-                                item.Enabled = false;
-                            }
-                        }                       
+                            item.Enabled = false;
+                        }
                     }
                 }
                 catch (Exception)
@@ -603,30 +595,25 @@ namespace GoStreamAudioGUI
                     file.Tag.Pictures = null;
 
                     // reset the picture to the default one
-                    //Control ctls = this.Controls["pictBox"];
-                    //if (ctls != null)
+                    try
                     {
-                        try
+                        pictBox.Image = GoStreamAudioGUI.Properties.Resources.noPic;
+                        foreach (ToolStripItem item in cMenu.Items)
                         {
-                            //PictureBox pictBox = (PictureBox)ctls;
-                            pictBox.Image = GoStreamAudioGUI.Properties.Resources.noPic;
-                            foreach (ToolStripItem item in cMenu.Items)
+                            if ((string)item.Text == cmRemove)
                             {
-                                if ((string)item.Text == cmRemove)
-                                {
-                                    item.Enabled = false;
-                                }
-                                if ((string)item.Text == cmChange
-                                    || (string)item.Text == cmGetOnline)
-                                {
-                                    item.Enabled = true;
-                                }
+                                item.Enabled = false;
+                            }
+                            if ((string)item.Text == cmChange
+                                || (string)item.Text == cmGetOnline)
+                            {
+                                item.Enabled = true;
                             }
                         }
-                        catch (Exception)
-                        {
+                    }
+                    catch (Exception)
+                    {
 
-                        }
                     }
                 }
             }
