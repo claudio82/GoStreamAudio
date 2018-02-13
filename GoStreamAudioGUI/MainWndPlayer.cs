@@ -18,8 +18,7 @@ namespace GoStreamAudioGUI
         #region Private Fields
         
         private const float VOL_INIT = 0.5f;
-
-        //private fields        
+            
         private EventWaitHandle waitHandle = new ManualResetEvent(false);
         private AudioFileInfo currentAudioFile;
         private string mAudioFile;
@@ -38,6 +37,7 @@ namespace GoStreamAudioGUI
         private int shuffleCnt = 0;
 
         private System.Resources.ResourceManager rm;
+        private KeyboardHook gkHook;
 
         #endregion
         
@@ -119,6 +119,22 @@ namespace GoStreamAudioGUI
         {
             InitializeComponent();
 
+            gkHook = new KeyboardHook();
+            gkHook.KeyPressed +=
+                new EventHandler<KeyPressedEventArgs>(OnKeyPressed);
+            try
+            {
+                // register multimedia keys
+                gkHook.RegisterHotKey(0, Keys.MediaPlayPause);
+                gkHook.RegisterHotKey(0, Keys.MediaStop);
+                gkHook.RegisterHotKey(0, Keys.MediaPreviousTrack);
+                gkHook.RegisterHotKey(0, Keys.MediaNextTrack);
+            }
+            catch (Exception ex)
+            {
+                Debug.WriteLine("Error: " + ex.Message);
+            }
+            
             plWnd = new PlayListWnd(this);
             plWnd.CloseButtonClicked += plWnd_CloseButtonClicked;
             plWnd.PlaylistItemDoubleClicked += plWnd_PlaylistItemDoubleClicked;
@@ -159,7 +175,7 @@ namespace GoStreamAudioGUI
 
             BringToFront();
         }
-
+        
         #endregion
         
         #region Public Methods
@@ -604,13 +620,19 @@ namespace GoStreamAudioGUI
                 aTimer = null;
             }
             if (marqueeLbl != null)
-                marqueeLbl.Dispose();            
+                marqueeLbl.Dispose();
             plWnd.CloseButtonClicked -= plWnd_CloseButtonClicked;
             plWnd.PlaylistItemDoubleClicked -= plWnd_PlaylistItemDoubleClicked;
             plWnd.PlaylistLoaded -= plWnd_PlaylistLoaded;
             plWnd.PlaylistCleared -= plWnd_PlaylistCleared;
             plWnd.Close();
             plWnd.Dispose();
+
+            if (gkHook != null)
+            {
+                gkHook.KeyPressed -= OnKeyPressed;
+                gkHook.Dispose();
+            }
         }
 
         #endregion
@@ -1146,7 +1168,41 @@ namespace GoStreamAudioGUI
             mUpdateAudioPos = false;
         }
 
-        // Specify what you want to happen when the Elapsed event is raised.
+        /// <summary>
+        /// this event is raised when a multimedia key is pressed
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void OnKeyPressed(object sender, KeyPressedEventArgs e)
+        {
+            switch (e.Key)
+            {
+                case Keys.MediaStop:
+                    if (btnStop.Enabled)
+                        btnStop_Click(sender, e);
+                    break;
+                case Keys.MediaPlayPause:
+                    if (btnPlay.Enabled)
+                        btnPlay_Click(sender, e);
+                    else
+                        btnPause_Click(sender, e);
+                    break;
+                case Keys.MediaPreviousTrack:
+                    if (btnRew.Enabled)
+                        btnRew_Click(sender, e);
+                    break;
+                case Keys.MediaNextTrack:
+                    if (btnFwd.Enabled)
+                        btnFwd_Click(sender, e);
+                    break;
+            }
+        }
+        
+        /// <summary>
+        /// specify what you want to happen when the Elapsed event is raised
+        /// </summary>
+        /// <param name="source"></param>
+        /// <param name="e"></param>
         private void OnTimedEvent(object source, ElapsedEventArgs e)
         {
             Action updateTbPos;

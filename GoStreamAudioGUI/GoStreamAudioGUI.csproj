@@ -86,6 +86,7 @@
     <Compile Include="formControls\MarqueeLabel.cs">
       <SubType>Component</SubType>
     </Compile>
+    <Compile Include="hooks\KeyboardHook.cs" />
     <Compile Include="installer\CustomInstaller.cs">
       <SubType>Component</SubType>
     </Compile>
