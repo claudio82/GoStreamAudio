@@ -14,7 +14,18 @@ Supported playlist formats: M3U
 
 # Next things to do
 - Playlist continuous repeat mode
+- Play audio CDs
 - ...
+
+# Included external libraries
+The application uses the following external libraries (some of them were adapted to .NET version 3.5):
+- NAudio (https://github.com/naudio/NAudio) 
+- NAudio.Flac (https://github.com/nharren/NAudio.Flac)
+- NAudio.Vorbis (https://github.com/naudio/Vorbis)
+- NVorbis (http://nvorbis.codeplex.com)
+- Luminescence.Xiph (http://xiph.codeplex.com)
+- taglib-sharp (https://github.com/mono/taglib-sharp/)
+- Notification-Popup-Window (https://github.com/Tulpep/Notification-Popup-Window)
 
 # Build and Test
 To compile the following is required:
