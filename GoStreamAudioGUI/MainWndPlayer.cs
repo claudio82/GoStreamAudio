@@ -9,6 +9,7 @@ using System.IO;
 using System.Threading;
 using System.Timers;
 using System.Windows.Forms;
+using Tulpep.NotificationWindow;
 
 namespace GoStreamAudioGUI
 {
@@ -38,6 +39,7 @@ namespace GoStreamAudioGUI
 
         private System.Resources.ResourceManager rm;
         private KeyboardHook gkHook;
+        private PopupNotifier pnTrackInfo;
 
         #endregion
         
@@ -134,6 +136,14 @@ namespace GoStreamAudioGUI
             {
                 Debug.WriteLine("Error: " + ex.Message);
             }
+
+            pnTrackInfo = new PopupNotifier();
+            pnTrackInfo.IsRightToLeft = false;
+            pnTrackInfo.ShowGrip = false;
+            pnTrackInfo.BodyColor = Color.Black;
+            pnTrackInfo.ContentColor = Color.White;
+            pnTrackInfo.ContentFont = new Font(FontFamily.GenericSansSerif, 11);
+            pnTrackInfo.Size = new Size(340, 80);
             
             plWnd = new PlayListWnd(this);
             plWnd.CloseButtonClicked += plWnd_CloseButtonClicked;
@@ -552,6 +562,20 @@ namespace GoStreamAudioGUI
             }
         }
 
+        private void ShowPopup()
+        {
+            if (currentAudioFile != null)
+            {
+                Action action = () =>
+                {
+                    pnTrackInfo.TitleText = "";
+                    pnTrackInfo.ContentText = currentAudioFile.FileName;
+                    pnTrackInfo.Popup();
+                };
+                Invoke(action);
+            }
+        }
+
         private bool ResetPlayList(object sender, EventArgs e, int plIdx)
         {
             bool canPlay = false;
@@ -627,6 +651,9 @@ namespace GoStreamAudioGUI
             plWnd.PlaylistCleared -= plWnd_PlaylistCleared;
             plWnd.Close();
             plWnd.Dispose();
+
+            if (pnTrackInfo != null)
+                pnTrackInfo.Dispose();
 
             if (gkHook != null)
             {
@@ -729,6 +756,7 @@ namespace GoStreamAudioGUI
                                     StartPlaybackThread();
                                     NextTrackStarted(this, e);
                                     UpdateMarquee();
+                                    ShowPopup();
                                 }
                                 catch (Exception)
                                 {
@@ -837,6 +865,7 @@ namespace GoStreamAudioGUI
                 chkShuffle.Enabled = true;
                 currentAudioFile = plWnd.GetFileToPlay(plWnd.LastFileIdx);
                 UpdateMarquee();
+                ShowPopup();
                 if (audioPlayer != null)
                 {
                     //audioPlayer.PlaybackStopType = PlaybackStopTypes.PlaybackStoppedByUser;
@@ -989,6 +1018,7 @@ namespace GoStreamAudioGUI
                             userStopped = false;
                             currentAudioFile = plWnd.GetFileToPlay(plWnd.LastFileIdx);
                             UpdateMarquee();
+                            ShowPopup();
                         }
                     }
                 }
@@ -1003,8 +1033,8 @@ namespace GoStreamAudioGUI
                         {
                             isWaitingHandle = false;                            
                             waitHandle.Set();
-                            if (File.Exists(mAudioFile))
-                                UpdateMarquee();
+                            //if (File.Exists(mAudioFile))
+                            //    UpdateMarquee();
                         }
                         else
                         {
@@ -1015,6 +1045,7 @@ namespace GoStreamAudioGUI
                                 userStopped = false;
                                 currentAudioFile = plWnd.GetFileToPlay(plWnd.LastFileIdx);
                                 UpdateMarquee();
+                                ShowPopup();
                             }
                         }
                     }
@@ -1034,6 +1065,7 @@ namespace GoStreamAudioGUI
                     userStopped = false;
                     currentAudioFile = plWnd.GetFileToPlay(plWnd.LastFileIdx);
                     UpdateMarquee();
+                    ShowPopup();
                 }
             }
         }
@@ -1075,6 +1107,7 @@ namespace GoStreamAudioGUI
                             userStopped = false;
                             currentAudioFile = plWnd.GetFileToPlay(plWnd.LastFileIdx);
                             UpdateMarquee();
+                            ShowPopup();
                         }
                     }
                 }
@@ -1100,6 +1133,7 @@ namespace GoStreamAudioGUI
                                 userStopped = false;
                                 currentAudioFile = plWnd.GetFileToPlay(plWnd.LastFileIdx);
                                 UpdateMarquee();
+                                ShowPopup();
                             }
                         }
                     }
@@ -1119,6 +1153,7 @@ namespace GoStreamAudioGUI
                     userStopped = false;
                     currentAudioFile = plWnd.GetFileToPlay(plWnd.LastFileIdx);
                     UpdateMarquee();
+                    ShowPopup();
                 }
             }
         }
